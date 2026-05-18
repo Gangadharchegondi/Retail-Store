@@ -1,0 +1,13 @@
+.env
+.venv/
+.pytest_cache/
+.vscode/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+smart_store.db
+*.sqlite3
+*.log
+*.zip

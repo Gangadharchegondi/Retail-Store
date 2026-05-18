@@ -1,0 +1,155 @@
+<!-- SmartRetail UI Components Reference Guide -->
+<!-- This file demonstrates all available styles for quick reference -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SmartRetail UI Components</title>
+    <link rel="stylesheet" href="static/css/main.css">
+    <script src="https://kit.fontawesome.com/6d6d5f2a2c.js"></script>
+    <style>
+        .component-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+        }
+        .component-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+        }
+        .component-section h3 {
+            margin-top: 0;
+            color: #6366f1;
+        }
+        code {
+            background: #f1f5f9;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div style="background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%); color: white; padding: 2rem; text-align: center;">
+        <h1>SmartRetail UI Component Library</h1>
+        <p>Premium Design System with Modern Components</p>
+    </div>
+
+    <div class="component-showcase">
+        <!-- Buttons Section -->
+        <div class="component-section">
+            <h3>Buttons</h3>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button class="btn btn-primary">Primary Button</button>
+                <button class="btn btn-secondary">Secondary</button>
+                <button class="btn btn-success">Success</button>
+                <button class="btn btn-danger">Danger</button>
+            </div>
+            <code>.btn .btn-primary</code>
+        </div>
+
+        <!-- Colors Section -->
+        <div class="component-section">
+            <h3>Color Palette</h3>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                <div style="background: #6366f1; color: white; padding: 1rem; border-radius: 0.5rem; text-align: center;">Primary<br><small>#6366f1</small></div>
+                <div style="background: #06b6d4; color: white; padding: 1rem; border-radius: 0.5rem; text-align: center;">Secondary<br><small>#06b6d4</small></div>
+                <div style="background: #10b981; color: white; padding: 1rem; border-radius: 0.5rem; text-align: center;">Success<br><small>#10b981</small></div>
+                <div style="background: #ef4444; color: white; padding: 1rem; border-radius: 0.5rem; text-align: center;">Danger<br><small>#ef4444</small></div>
+            </div>
+        </div>
+
+        <!-- Cards Section -->
+        <div class="component-section">
+            <h3>Cards</h3>
+            <div class="card">
+                <h4>Card Title</h4>
+                <p>This is a sample card with the standard styling.</p>
+                <button class="btn btn-primary btn-sm">Learn More</button>
+            </div>
+        </div>
+
+        <!-- Badges Section -->
+        <div class="component-section">
+            <h3>Badges</h3>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <span class="badge badge-primary"><i class="fas fa-star"></i> Featured</span>
+                <span class="badge badge-success"><i class="fas fa-check"></i> Active</span>
+                <span class="badge badge-danger"><i class="fas fa-times"></i> Critical</span>
+            </div>
+        </div>
+
+        <!-- Alerts Section -->
+        <div class="component-section">
+            <h3>Alerts</h3>
+            <div class="alert alert-success">
+                <div class="alert-icon">✓</div>
+                <div class="alert-content">
+                    <div class="alert-title">Success</div>
+                    <div class="alert-message">Your order has been placed successfully</div>
+                </div>
+                <button class="alert-close" onclick="this.closest('.alert').classList.add('dismissing'); setTimeout(() => this.closest('.alert').remove(), 300);">✕</button>
+            </div>
+            <div class="alert alert-danger">
+                <div class="alert-icon">✕</div>
+                <div class="alert-content">
+                    <div class="alert-title">Error</div>
+                    <div class="alert-message">Something went wrong. Please try again.</div>
+                </div>
+                <button class="alert-close" onclick="this.closest('.alert').classList.add('dismissing'); setTimeout(() => this.closest('.alert').remove(), 300);">✕</button>
+            </div>
+            <div class="alert alert-warning">
+                <div class="alert-icon">⚠</div>
+                <div class="alert-content">
+                    <div class="alert-title">Warning</div>
+                    <div class="alert-message">Low stock: Only 2 items left in inventory</div>
+                </div>
+                <button class="alert-close" onclick="this.closest('.alert').classList.add('dismissing'); setTimeout(() => this.closest('.alert').remove(), 300);">✕</button>
+            </div>
+            <div class="alert alert-info">
+                <div class="alert-icon">ℹ</div>
+                <div class="alert-content">
+                    <div class="alert-title">Information</div>
+                    <div class="alert-message">New products available in your favorite category</div>
+                </div>
+                <button class="alert-close" onclick="this.closest('.alert').classList.add('dismissing'); setTimeout(() => this.closest('.alert').remove(), 300);">✕</button>
+            </div>
+        </div>
+
+        <!-- Forms Section -->
+        <div class="component-section">
+            <h3>Form Elements</h3>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" placeholder="Enter your email" value="example@smartretail.com">
+            </div>
+            <div class="form-group">
+                <label>Message</label>
+                <textarea placeholder="Your message here" rows="3"></textarea>
+            </div>
+        </div>
+
+        <!-- Grid System -->
+        <div class="component-section">
+            <h3>Responsive Grid</h3>
+            <div class="grid-responsive">
+                <div style="background: #f1f5f9; padding: 1rem; border-radius: 0.5rem;">Grid Item 1</div>
+                <div style="background: #f1f5f9; padding: 1rem; border-radius: 0.5rem;">Grid Item 2</div>
+                <div style="background: #f1f5f9; padding: 1rem; border-radius: 0.5rem;">Grid Item 3</div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .component-showcase {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+    </style>
+</body>
+</html>

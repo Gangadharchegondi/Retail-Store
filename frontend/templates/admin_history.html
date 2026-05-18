@@ -1,0 +1,213 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+<title>Audit History - SmartRetail</title>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.audit-page {
+    min-height: calc(100vh - 64px);
+    background:
+        radial-gradient(820px 380px at 6% -8%, rgba(15, 118, 110, 0.18), transparent 52%),
+        radial-gradient(860px 420px at 100% 0%, rgba(245, 158, 11, 0.14), transparent 54%),
+        linear-gradient(180deg, #f3fbf8 0%, #edf9f5 45%, #f8fbff 100%);
+}
+
+.audit-hero {
+    border-radius: 24px;
+    border: 1px solid rgba(148, 163, 184, 0.26);
+    background: linear-gradient(128deg, rgba(11, 19, 36, 0.97), rgba(15, 118, 110, 0.95));
+    box-shadow: 0 28px 68px rgba(15, 23, 42, 0.24);
+}
+
+.audit-panel {
+    border-radius: 18px;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+}
+
+.audit-input {
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    border-radius: 10px;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.85rem;
+    color: #0f172a;
+    background: #ffffff;
+}
+
+.audit-input:focus {
+    outline: none;
+    border-color: rgba(15, 118, 110, 0.6);
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+
+.meta-box {
+    max-width: 340px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 0.72rem;
+    color: #334155;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.4rem 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="audit-page">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="audit-hero p-7 mb-8 text-white">
+            <p class="text-xs tracking-[0.18em] uppercase font-bold text-emerald-200">Control</p>
+            <h1 class="text-3xl sm:text-4xl font-black mt-2">
+                <i class="fas fa-timeline text-amber-300 mr-3"></i>Audit History
+            </h1>
+            <p class="text-slate-200 mt-2">{{ 'Admin scope: viewing all system events.' if is_admin else 'User scope: viewing your own audit events.' }}</p>
+        </div>
+
+        <div class="audit-panel overflow-hidden">
+            <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/80">
+                <form id="audit-filter-form" class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                    <div>
+                        <label for="event_type" class="block text-xs font-bold uppercase tracking-wide text-slate-600 mb-1">Event Type</label>
+                        <input id="event_type" name="event_type" placeholder="all or payment.cashfree..." class="audit-input w-full" />
+                    </div>
+                    <div>
+                        <label for="q" class="block text-xs font-bold uppercase tracking-wide text-slate-600 mb-1">Search</label>
+                        <input id="q" name="q" placeholder="Order id or message" class="audit-input w-full" />
+                    </div>
+                    <div>
+                        <label for="page_size" class="block text-xs font-bold uppercase tracking-wide text-slate-600 mb-1">Rows</label>
+                        <select id="page_size" name="page_size" class="audit-input w-full">
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-800">
+                            <i class="fas fa-filter"></i>
+                            Apply
+                        </button>
+                        <a href="/admin/history" class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">
+                            Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-600">Time</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-600">Event</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-600">User</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-600">Order</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-600">Message</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-600">Metadata</th>
+                        </tr>
+                    </thead>
+                    <tbody id="audit-body">
+                        {% for _ in range(5) %}
+                        <tr class="border-b border-slate-100">
+                            <td class="px-4 py-3"><div class="skeleton h-4 rounded"></div></td>
+                            <td class="px-4 py-3"><div class="skeleton h-4 rounded"></div></td>
+                            <td class="px-4 py-3"><div class="skeleton h-4 rounded"></div></td>
+                            <td class="px-4 py-3"><div class="skeleton h-4 rounded"></div></td>
+                            <td class="px-4 py-3"><div class="skeleton h-4 rounded"></div></td>
+                            <td class="px-4 py-3"><div class="skeleton h-4 rounded"></div></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="audit-pagination" class="px-4 sm:px-5 py-4 border-t border-slate-200 bg-slate-50/80"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('audit-filter-form');
+    const body = document.getElementById('audit-body');
+    const pagination = document.getElementById('audit-pagination');
+
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById('event_type').value = params.get('event_type') || 'all';
+    document.getElementById('q').value = params.get('q') || '';
+    document.getElementById('page_size').value = params.get('page_size') || '20';
+
+    async function loadAuditEvents() {
+        const requestParams = new URLSearchParams(window.location.search);
+        const response = await fetch(`/api/audit-events?${requestParams.toString()}`, { cache: 'no-store' });
+        const payload = await response.json();
+
+        const events = Array.isArray(payload.events) ? payload.events : [];
+        if (events.length === 0) {
+            body.innerHTML = `
+                <tr>
+                    <td colspan="6" class="px-6 py-8 text-center text-sm text-slate-500">No audit events found for the current filters.</td>
+                </tr>
+            `;
+        } else {
+            body.innerHTML = events.map((item) => {
+                const metadataText = item.metadata ? JSON.stringify(item.metadata, null, 2) : '-';
+                return `
+                    <tr class="border-b border-slate-100 hover:bg-slate-50/70">
+                        <td class="px-4 py-3 text-xs font-semibold text-slate-700 whitespace-nowrap">${item.created_at_display || '-'}</td>
+                        <td class="px-4 py-3 text-xs font-bold text-slate-900">${item.event_type || '-'}</td>
+                        <td class="px-4 py-3 text-xs text-slate-700">${item.user_id ?? '-'}</td>
+                        <td class="px-4 py-3 text-xs text-slate-700">${item.order_id ?? '-'}</td>
+                        <td class="px-4 py-3 text-xs text-slate-700">${item.message || '-'}</td>
+                        <td class="px-4 py-3"><div class="meta-box">${metadataText}</div></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        const pg = payload.pagination || {};
+        const filters = payload.filters || {};
+        const hasPrev = Boolean(pg.has_prev);
+        const hasNext = Boolean(pg.has_next);
+
+        const prevLink = hasPrev
+            ? `/admin/history?page=${pg.prev_page}&page_size=${pg.page_size}&event_type=${encodeURIComponent(filters.event_type || 'all')}&q=${encodeURIComponent(filters.q || '')}`
+            : '';
+        const nextLink = hasNext
+            ? `/admin/history?page=${pg.next_page}&page_size=${pg.page_size}&event_type=${encodeURIComponent(filters.event_type || 'all')}&q=${encodeURIComponent(filters.q || '')}`
+            : '';
+
+        pagination.innerHTML = `
+            <div class="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+                <p class="text-xs font-semibold text-slate-600">Showing page ${pg.page || 1} of ${pg.total_pages || 1} (${pg.total_events || 0} events)</p>
+                <div class="flex items-center gap-2">
+                    ${hasPrev ? `<a href="${prevLink}" class="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100"><i class="fas fa-chevron-left"></i>Previous</a>` : ''}
+                    ${hasNext ? `<a href="${nextLink}" class="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100">Next<i class="fas fa-chevron-right"></i></a>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const urlParams = new URLSearchParams();
+        urlParams.set('event_type', (document.getElementById('event_type').value || 'all').trim() || 'all');
+        urlParams.set('q', (document.getElementById('q').value || '').trim());
+        urlParams.set('page_size', document.getElementById('page_size').value || '20');
+        urlParams.set('page', '1');
+        window.location.href = `/admin/history?${urlParams.toString()}`;
+    });
+
+    loadAuditEvents();
+});
+</script>
+{% endblock %}

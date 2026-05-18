@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="theme-color" content="#0f766e" />
+    <meta name="description" content="SmartRetail - AI Powered Smart Checkout System" />
+    {% block title %}<title>SmartRetail</title>{% endblock %}
+    <link rel="icon" type="image/svg+xml" href="/static/images/logo.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/6d6d5f2a2c.js" crossorigin="anonymous" defer></script>
+    <link rel="stylesheet" href="/static/css/main.css" media="print" onload="this.media='all'" />
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
+    <div class="min-h-screen flex flex-col">
+        <!-- Premium Modern Navbar -->
+        <header class="sticky top-0 z-50 border-b border-emerald-100 bg-white/90 backdrop-blur-lg shadow-sm">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16 sm:h-[4.5rem]">
+                    <!-- Left: Logo Section -->
+                    <a href="/site" class="flex items-center gap-2 sm:gap-3 group flex-shrink-0 hover:opacity-80 transition-opacity">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-emerald-700 via-teal-600 to-amber-500 p-1.5 text-white shadow-lg group-hover:shadow-xl transition-all duration-300 overflow-hidden">
+                            <img
+                                src="/static/images/logo.svg"
+                                alt="SmartRetail"
+                                class="h-full w-full object-contain object-center"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"
+                            />
+                            <span class="font-black text-base" style="display:none;">SR</span>
+                        </div>
+                        <div class="hidden sm:flex flex-col min-w-0">
+                            <h1 class="text-lg font-black tracking-tight brand-gradient-text">SmartRetail</h1>
+                            <p class="text-xs text-slate-500 font-medium">AI Smart Checkout</p>
+                        </div>
+                    </a>
+
+                    <!-- Right: Actions -->
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <!-- Cart Button -->
+                        <a href="/payment" class="relative flex items-center justify-center h-10 w-10 rounded-2xl bg-gradient-to-br from-emerald-700 to-amber-500 text-white font-bold shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5" title="Shopping Cart">
+                            <img src="/static/images/cart-symbol.svg" alt="Cart" class="h-6 w-6 object-contain" />
+                            <span id="navbar-cart-badge" class="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg animate-pulse">0</span>
+                        </a>
+
+                        <!-- Profile + More Actions -->
+                        <div class="relative flex items-center gap-2">
+                            <a href="/profile" class="flex items-center justify-center h-10 w-10 rounded-2xl bg-emerald-50 text-emerald-700 font-bold hover:bg-emerald-100 transition-colors overflow-hidden" title="Profile">
+                                <img
+                                    src="/static/images/avatar-profile.svg"
+                                    alt="User avatar"
+                                    class="h-full w-full object-cover"
+                                    onerror="this.style.display='none'; this.parentElement.querySelector('.profile-fallback-icon').style.display='inline-flex';"
+                                />
+                                <span class="profile-fallback-icon hidden items-center justify-center h-full w-full"><i class="fas fa-user"></i></span>
+                            </a>
+
+                            <button
+                                id="profile-more-toggle"
+                                onclick="toggleProfileMoreMenu(event)"
+                                class="flex items-center justify-center h-10 w-10 rounded-2xl text-slate-700 hover:bg-slate-100 transition-colors"
+                                title="More"
+                                aria-expanded="false"
+                                aria-controls="profile-more-menu"
+                            >
+                                <span class="text-xl leading-none font-bold">...</span>
+                            </button>
+
+                            <div id="profile-more-menu" class="hidden absolute right-0 top-12 min-w-[11rem] rounded-xl border border-slate-200 bg-white shadow-lg p-1.5 z-50">
+                                <a href="/orders" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors">
+                                    <i class="fas fa-receipt w-4"></i>
+                                    <span>My Orders</span>
+                                </a>
+                                <a href="/admin/history" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors">
+                                    <i class="fas fa-timeline w-4"></i>
+                                    <span>Audit History</span>
+                                </a>
+                                <a href="/profile" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors">
+                                    <i class="fas fa-user w-4"></i>
+                                    <span>Profile</span>
+                                </a>
+                                <a href="/logout" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors">
+                                    <i class="fas fa-sign-out-alt w-4"></i>
+                                    <span>Logout</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Menu Toggle -->
+                        <button id="menu-toggle" onclick="toggleMainMenu()" class="md:hidden flex items-center justify-center h-10 w-10 rounded-2xl text-slate-700 hover:bg-slate-100 transition-colors" title="Menu">
+                            <i class="fas fa-bars text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="main-menu" class="hidden md:hidden border-t border-emerald-100 bg-emerald-50">
+                <div class="px-4 py-3 space-y-2">
+                    <a href="/payment" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white transition-colors" onclick="closeMainMenu()">
+                        <i class="fas fa-credit-card text-emerald-700 w-5"></i>
+                        <span class="text-sm font-semibold text-slate-900">Checkout</span>
+                    </a>
+                    <div class="h-px bg-slate-200 my-2"></div>
+                    <a href="/orders" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white transition-colors" onclick="closeMainMenu()">
+                        <i class="fas fa-receipt text-slate-600 w-5"></i>
+                        <span class="text-sm font-semibold text-slate-900">My Orders</span>
+                    </a>
+                    <a href="/admin/history" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white transition-colors" onclick="closeMainMenu()">
+                        <i class="fas fa-timeline text-slate-600 w-5"></i>
+                        <span class="text-sm font-semibold text-slate-900">Audit History</span>
+                    </a>
+                    <a href="/profile" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white transition-colors" onclick="closeMainMenu()">
+                        <i class="fas fa-user-circle text-slate-600 w-5"></i>
+                        <span class="text-sm font-semibold text-slate-900">My Profile</span>
+                    </a>
+                    <div class="h-px bg-slate-200 my-2"></div>
+                    <a href="/logout" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-red-50 transition-colors" onclick="closeMainMenu()">
+                        <i class="fas fa-sign-out-alt text-red-600 w-5"></i>
+                        <span class="text-sm font-semibold text-red-600">Logout</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Premium Footer -->
+        <footer class="border-t border-emerald-100 bg-gradient-to-b from-white to-emerald-50 backdrop-blur">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="py-12">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-10">
+                        <!-- Brand -->
+                        <div>
+                            <div class="flex items-center gap-2 mb-4">
+                                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-700 to-amber-500 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                                    <span>SR</span>
+                                </div>
+                                <span class="font-black text-lg text-slate-900">SmartRetail</span>
+                            </div>
+                            <p class="text-sm text-slate-600 leading-relaxed">AI-powered smart checkout system designed for speed, accuracy, and exceptional shopping experiences.</p>
+                        </div>
+                        <!-- Product Links -->
+                        <div>
+                            <h4 class="font-bold text-slate-900 mb-4 uppercase text-xs tracking-widest">Product</h4>
+                            <ul class="space-y-3 text-sm">
+                                <li><a href="/site" class="text-slate-600 hover:text-emerald-700 font-medium transition-colors">Store</a></li>
+                                <li><a href="/scan" class="text-slate-600 hover:text-emerald-700 font-medium transition-colors">Scanner</a></li>
+                                <li><a href="/dashboard" class="text-slate-600 hover:text-emerald-700 font-medium transition-colors">Dashboard</a></li>
+                                <li><a href="/payment" class="text-slate-600 hover:text-emerald-700 font-medium transition-colors">Checkout</a></li>
+                            </ul>
+                        </div>
+                        <!-- Company Links -->
+                        <div>
+                            <h4 class="font-bold text-slate-900 mb-4 uppercase text-xs tracking-widest">Company</h4>
+                            <ul class="space-y-3 text-sm">
+                                <li><a href="#" class="text-slate-600 hover:text-emerald-700 font-medium transition-colors">About Us</a></li>
+                                <li><a href="#" class="text-slate-600 hover:text-emerald-700 font-medium transition-colors">Contact</a></li>
+                                <li><a href="#" class="text-slate-600 hover:text-emerald-700 font-medium transition-colors">Privacy Policy</a></li>
+                                <li><a href="#" class="text-slate-600 hover:text-emerald-700 font-medium transition-colors">Terms of Service</a></li>
+                            </ul>
+                        </div>
+                        <!-- Support Links -->
+                        <div>
+                            <h4 class="font-bold text-slate-900 mb-4 uppercase text-xs tracking-widest">Support</h4>
+                            <ul class="space-y-3 text-sm">
+                                <li><a href="#" class="text-slate-600 hover:text-emerald-700 font-medium transition-colors">Help Center</a></li>
+                                <li><a href="#" class="text-slate-600 hover:text-emerald-700 font-medium transition-colors">System Status</a></li>
+                                <li><a href="#" class="text-slate-600 hover:text-emerald-700 font-medium transition-colors">Send Feedback</a></li>
+                                <li><a href="mailto:support@smartretail.local" class="text-slate-600 hover:text-emerald-700 font-medium transition-colors">Email Support</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-slate-200 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <p class="text-sm text-slate-600 font-medium">&copy; 2026 SmartRetail. All rights reserved. Built with <span class="text-red-500">❤️</span></p>
+                        <div class="flex gap-4">
+                            <a href="#" class="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center text-slate-700 hover:bg-emerald-700 hover:text-white transition-all" title="Facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center text-slate-700 hover:bg-emerald-700 hover:text-white transition-all" title="Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center text-slate-700 hover:bg-emerald-700 hover:text-white transition-all" title="LinkedIn">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center text-slate-700 hover:bg-emerald-700 hover:text-white transition-all" title="Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Floating Cart Button - Circular -->
+        <a href="/payment" class="floating-cart-btn fixed bottom-8 right-8 z-40 flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-emerald-700 to-amber-500 text-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all no-print" title="Go to Checkout">
+            <img src="/static/images/cart-symbol.svg" alt="Cart" class="h-7 w-7 object-contain" />
+            <span id="floating-cart-badge" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg animate-pulse border-2 border-white">0</span>
+        </a>
+    </div>
+
+    {% block extra_js %}{% endblock %}
+
+    <!-- Navigation Script -->
+    <script>
+        // Toggle main menu visibility
+        function toggleMainMenu() {
+            const menu = document.getElementById('main-menu');
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
+        }
+
+        // Close main menu
+        function closeMainMenu() {
+            const menu = document.getElementById('main-menu');
+            if (menu) {
+                menu.classList.add('hidden');
+            }
+        }
+
+        function toggleProfileMoreMenu(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+
+            const menu = document.getElementById('profile-more-menu');
+            const toggle = document.getElementById('profile-more-toggle');
+
+            if (!menu || !toggle) {
+                return;
+            }
+
+            const isOpen = !menu.classList.contains('hidden');
+            menu.classList.toggle('hidden', isOpen);
+            toggle.setAttribute('aria-expanded', String(!isOpen));
+        }
+
+        function closeProfileMoreMenu() {
+            const menu = document.getElementById('profile-more-menu');
+            const toggle = document.getElementById('profile-more-toggle');
+
+            if (menu) {
+                menu.classList.add('hidden');
+            }
+
+            if (toggle) {
+                toggle.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('main-menu');
+            const toggle = document.getElementById('menu-toggle');
+            if (menu && toggle && !menu.contains(e.target) && !toggle.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+
+            const profileMoreMenu = document.getElementById('profile-more-menu');
+            const profileMoreToggle = document.getElementById('profile-more-toggle');
+            if (
+                profileMoreMenu &&
+                profileMoreToggle &&
+                !profileMoreMenu.contains(e.target) &&
+                !profileMoreToggle.contains(e.target)
+            ) {
+                closeProfileMoreMenu();
+            }
+        });
+
+        // Close menu on Escape key
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeMainMenu();
+                closeProfileMoreMenu();
+            }
+        });
+
+        // Update cart badges with debouncing
+        let cartUpdateTimeout;
+        function updateCartBadges(count = 0) {
+            clearTimeout(cartUpdateTimeout);
+            cartUpdateTimeout = setTimeout(() => {
+                const badgeIds = ['navbar-cart-badge', 'floating-cart-badge', 'cart-badge-float', 'cart-count'];
+                badgeIds.forEach((id) => {
+                    const badge = document.getElementById(id);
+                    if (badge) badge.textContent = count;
+                });
+            }, 100);
+        }
+
+        async function refreshCartBadgeCount() {
+            try {
+                const response = await fetch('/api/cart/count', { cache: 'no-store' });
+                if (!response.ok) return;
+                const data = await response.json();
+                updateCartBadges(Number(data.count || 0));
+            } catch (error) {
+                console.error('Failed to refresh cart count:', error);
+            }
+        }
+
+        window.addEventListener('cart:changed', (event) => {
+            const count = Number(event?.detail?.count || 0);
+            updateCartBadges(count);
+        });
+
+        window.addEventListener('focus', refreshCartBadgeCount);
+        window.addEventListener('pageshow', refreshCartBadgeCount);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                refreshCartBadgeCount();
+            }
+        });
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'cart:updated-at') {
+                refreshCartBadgeCount();
+            }
+        });
+
+        refreshCartBadgeCount();
+        setInterval(refreshCartBadgeCount, 3000);
+
+        // Prevent layout shift with image loading
+        document.addEventListener('load', (e) => {
+            if (e.target.tagName === 'IMG') {
+                e.target.style.backgroundColor = 'transparent';
+            }
+        }, true);
+    </script>
+</body>
+</html>

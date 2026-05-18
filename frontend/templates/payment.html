@@ -1,0 +1,1100 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+<title>Cashfree Checkout - SmartRetail</title>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --cf-primary: #0f766e;
+    --cf-primary-deep: #115e59;
+    --cf-accent: #f59e0b;
+    --cf-ink: #0b1324;
+    --cf-soft: #f7fbfa;
+}
+
+.payment-page {
+    min-height: calc(100vh - 64px);
+    background:
+        radial-gradient(900px 420px at 8% 0%, rgba(15, 118, 110, 0.17), transparent 50%),
+        radial-gradient(760px 360px at 100% 8%, rgba(245, 158, 11, 0.18), transparent 54%),
+        linear-gradient(180deg, #f7fcfb 0%, #f3faf7 48%, #f8fcff 100%);
+}
+
+.checkout-shell {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    border-radius: 30px;
+    background:
+        linear-gradient(135deg, rgba(11, 19, 36, 0.98), rgba(15, 118, 110, 0.93)),
+        radial-gradient(circle at 82% 12%, rgba(245, 158, 11, 0.24), transparent 44%);
+    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.24);
+}
+
+.checkout-shell::before,
+.checkout-shell::after {
+    content: "";
+    position: absolute;
+    border-radius: 9999px;
+    pointer-events: none;
+}
+
+.checkout-shell::before {
+    top: -70px;
+    right: -50px;
+    width: 240px;
+    height: 240px;
+    background: radial-gradient(circle, rgba(245, 158, 11, 0.34), transparent 70%);
+}
+
+.checkout-shell::after {
+    left: -90px;
+    bottom: -120px;
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(circle, rgba(20, 184, 166, 0.2), transparent 72%);
+}
+
+.checkout-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.10);
+    color: #f5f3d1;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 0.38rem 0.8rem;
+}
+
+.checkout-panel {
+    border-radius: 22px;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+
+.checkout-input {
+    width: 100%;
+    border: 1px solid rgba(148, 163, 184, 0.42);
+    border-radius: 14px;
+    padding: 0.82rem 0.95rem;
+    background: rgba(255, 255, 255, 0.96);
+    color: #0f172a;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.checkout-input:focus {
+    outline: none;
+    border-color: var(--cf-primary);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.14);
+}
+
+.checkout-input.is-invalid {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.14);
+}
+
+.field-hint {
+    margin-top: 0.35rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #64748b;
+    min-height: 1rem;
+}
+
+.field-hint.error {
+    color: #b91c1c;
+}
+
+.method-card {
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 255, 0.98));
+    transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.method-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+    border-color: rgba(15, 118, 110, 0.35);
+}
+
+.method-card.is-active {
+    border-color: rgba(15, 118, 110, 0.42);
+    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.11);
+}
+
+.summary-card {
+    border-radius: 22px;
+    border: 1px solid rgba(148, 163, 184, 0.26);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+
+.mobile-checkout-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    border-top: 1px solid rgba(148, 163, 184, 0.34);
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 -12px 30px rgba(15, 23, 42, 0.12);
+    padding: 0.72rem 0.88rem calc(0.72rem + env(safe-area-inset-bottom));
+}
+
+.mobile-total-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.mobile-total-value {
+    font-size: 1.18rem;
+    font-weight: 900;
+    color: #0f172a;
+}
+
+.checkout-main-btn {
+    border: none;
+    border-radius: 16px;
+    color: #ffffff;
+    font-weight: 900;
+    background: linear-gradient(92deg, var(--cf-primary) 0%, var(--cf-accent) 100%);
+    box-shadow: 0 16px 30px rgba(15, 118, 110, 0.30);
+    transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+}
+
+.checkout-main-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 34px rgba(15, 118, 110, 0.36);
+    filter: brightness(0.98);
+}
+
+.checkout-main-btn:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 9999px;
+    padding: 0.36rem 0.72rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.badge-pill-light {
+    background: rgba(255, 255, 255, 0.10);
+    color: #e0f2fe;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.badge-pill-soft {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.checkout-toast-container {
+    position: fixed;
+    right: 1.1rem;
+    bottom: 1.1rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    pointer-events: none;
+}
+
+.checkout-toast {
+    width: min(380px, calc(100vw - 2rem));
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.97), rgba(240, 249, 255, 0.90));
+    border-radius: 18px;
+    border: 1px solid rgba(125, 211, 252, 0.34);
+    box-shadow: 0 22px 54px rgba(15, 23, 42, 0.22);
+    padding: 0.92rem 1rem 0.86rem;
+    pointer-events: auto;
+    overflow: hidden;
+    transform-origin: right bottom;
+    backdrop-filter: blur(10px);
+    animation: checkoutToastIn 260ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.checkout-toast:hover {
+    transform: translateY(-2px) scale(1.005);
+    box-shadow: 0 26px 56px rgba(15, 23, 42, 0.28);
+}
+
+.checkout-toast::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: var(--cf-primary);
+}
+
+.checkout-toast-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.checkout-toast-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+
+.checkout-toast-title {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 900;
+    letter-spacing: 0.015em;
+    color: #0b1120;
+}
+
+.checkout-toast-message {
+    margin: 0.15rem 0 0;
+    font-weight: 600;
+    font-size: 0.84rem;
+    color: #3b4a61;
+    line-height: 1.35;
+}
+
+.checkout-toast-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.checkout-toast-close {
+    border: none;
+    background: transparent;
+    color: #7c8aa2;
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+.checkout-toast-close:hover {
+    background: rgba(148, 163, 184, 0.22);
+    color: #1e293b;
+}
+
+.checkout-toast-action {
+    display: block;
+    margin: 0.8rem 0 0 auto;
+    border: none;
+    border-radius: 999px;
+    min-width: 86px;
+    padding: 0.38rem 0.92rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #ffffff;
+    cursor: pointer;
+    transition: filter 150ms ease, transform 150ms ease;
+}
+
+.checkout-toast-action:hover {
+    filter: brightness(0.95);
+    transform: translateY(-1px);
+}
+
+.checkout-toast-progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    transform-origin: left center;
+    animation: checkoutToastProgress 4.5s linear forwards;
+}
+
+.checkout-toast-error .checkout-toast-icon {
+    border: 2px solid #fb7185;
+    background: linear-gradient(145deg, #fff1f2, #ffe4e6);
+    color: #e11d48;
+}
+
+.checkout-toast-error::before,
+.checkout-toast-error .checkout-toast-progress {
+    background: linear-gradient(180deg, #f43f5e, #e11d48);
+}
+
+.checkout-toast-error .checkout-toast-action {
+    background: linear-gradient(120deg, #fb7185, #f43f5e);
+}
+
+.checkout-toast-warning .checkout-toast-icon {
+    border: 2px solid #fbbf24;
+    background: linear-gradient(145deg, #fffbeb, #fef3c7);
+    color: #d97706;
+}
+
+.checkout-toast-warning::before,
+.checkout-toast-warning .checkout-toast-progress {
+    background: linear-gradient(180deg, #fbbf24, #f59e0b);
+}
+
+.checkout-toast-warning .checkout-toast-action {
+    background: linear-gradient(120deg, #fbbf24, #f59e0b);
+}
+
+.checkout-toast-info .checkout-toast-icon {
+    border: 2px solid #38bdf8;
+    background: linear-gradient(145deg, #ecfeff, #e0f2fe);
+    color: #0369a1;
+}
+
+.checkout-toast-info::before,
+.checkout-toast-info .checkout-toast-progress {
+    background: linear-gradient(180deg, #38bdf8, #0ea5e9);
+}
+
+.checkout-toast-info .checkout-toast-action,
+.checkout-toast-success .checkout-toast-action {
+    background: linear-gradient(120deg, #22d3ee, #0ea5e9);
+}
+
+.checkout-toast-success .checkout-toast-icon {
+    border: 2px solid #34d399;
+    background: linear-gradient(145deg, #ecfdf5, #d1fae5);
+    color: #059669;
+}
+
+.checkout-toast-success::before,
+.checkout-toast-success .checkout-toast-progress {
+    background: linear-gradient(180deg, #34d399, #10b981);
+}
+
+@keyframes checkoutToastIn {
+    from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.94);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes checkoutToastProgress {
+    from {
+        transform: scaleX(1);
+    }
+    to {
+        transform: scaleX(0);
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-page">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-28 lg:pb-10">
+        <div class="checkout-shell p-6 sm:p-8 lg:p-10 text-white mb-8">
+            <div class="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                <div class="max-w-2xl">
+                    <span class="checkout-kicker mb-4">
+                        <span class="h-2 w-2 rounded-full bg-amber-300"></span>
+                        Cashfree-powered checkout
+                    </span>
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight mb-3">
+                        Fast Cashfree payments for every cart.
+                    </h1>
+                    <p class="text-slate-200 text-base sm:text-lg leading-8 max-w-xl">
+                        Built for UPI-first shoppers with Cashfree reliability, smart method selection, and one-click redirect checkout.
+                    </p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="badge-pill badge-pill-light"><i class="fas fa-shield-halved"></i>Encrypted</span>
+                    <span class="badge-pill badge-pill-light"><i class="fas fa-bolt"></i>Fast redirect</span>
+                    <span class="badge-pill badge-pill-light"><i class="fas fa-mobile-screen"></i>Responsive</span>
+                </div>
+            </div>
+        </div>
+
+        <form id="checkout-form" class="grid grid-cols-1 lg:grid-cols-3 gap-6 xl:gap-8 items-start">
+            <div class="lg:col-span-2 space-y-6">
+                <div class="checkout-panel p-6 sm:p-7">
+                    <div class="flex items-center justify-between gap-3 mb-6">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Step 1</p>
+                            <h2 class="text-2xl font-black text-slate-900 mt-1">Shipping details</h2>
+                        </div>
+                        <span class="badge-pill badge-pill-soft"><i class="fas fa-lock"></i>Private</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label for="first_name" class="block text-sm font-semibold text-slate-700 mb-2">First Name</label>
+                            <input type="text" id="first_name" name="first_name" required class="checkout-input" placeholder="John" />
+                        </div>
+                        <div class="form-group">
+                            <label for="last_name" class="block text-sm font-semibold text-slate-700 mb-2">Last Name</label>
+                            <input type="text" id="last_name" name="last_name" required class="checkout-input" placeholder="Doe" />
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="block text-sm font-semibold text-slate-700 mb-2">Email</label>
+                            <input type="email" id="email" name="email" required class="checkout-input" placeholder="you@example.com" />
+                            <p id="hint-email" class="field-hint" aria-live="polite"></p>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone" class="block text-sm font-semibold text-slate-700 mb-2">Phone</label>
+                            <input type="tel" id="phone" name="phone" required class="checkout-input" placeholder="9999999999" />
+                            <p id="hint-phone" class="field-hint" aria-live="polite"></p>
+                        </div>
+                        <div class="form-group sm:col-span-2">
+                            <label for="address" class="block text-sm font-semibold text-slate-700 mb-2">Street Address</label>
+                            <input type="text" id="address" name="address" required class="checkout-input" placeholder="123 Market Street" />
+                        </div>
+                        <div class="form-group">
+                            <label for="city" class="block text-sm font-semibold text-slate-700 mb-2">City</label>
+                            <input type="text" id="city" name="city" required class="checkout-input" placeholder="Bengaluru" />
+                        </div>
+                        <div class="form-group">
+                            <label for="state" class="block text-sm font-semibold text-slate-700 mb-2">State</label>
+                            <input type="text" id="state" name="state" required class="checkout-input" placeholder="Karnataka" />
+                        </div>
+                        <div class="form-group">
+                            <label for="zip" class="block text-sm font-semibold text-slate-700 mb-2">ZIP Code</label>
+                            <input type="text" id="zip" name="zip" required class="checkout-input" placeholder="560001" />
+                            <p id="hint-zip" class="field-hint" aria-live="polite"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="checkout-panel p-6 sm:p-7">
+                    <div class="mb-6">
+                        <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Step 2</p>
+                        <h2 class="text-2xl font-black text-slate-900 mt-1">Choose your Cashfree payment mode</h2>
+                        <p class="text-sm text-slate-600 mt-2">Pick one supported method. Cashfree will securely handle payment and redirect completion.</p>
+                    </div>
+
+                    <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900 leading-6 mb-4">
+                        Supported now: UPI, Cards, Net Banking, and Wallets.
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <label class="method-card flex items-start gap-4 p-4 cursor-pointer">
+                            <input type="radio" name="payment_method" value="upi" checked required class="mt-1 h-4 w-4 text-emerald-700 focus:ring-emerald-500" />
+                            <div class="flex-1 min-w-0">
+                                <p class="font-black text-slate-900">UPI</p>
+                                <p class="text-sm text-slate-600 mt-1">UPI collect and intent through Cashfree checkout</p>
+                            </div>
+                        </label>
+
+                        <label class="method-card flex items-start gap-4 p-4 cursor-pointer">
+                            <input type="radio" name="payment_method" value="card" required class="mt-1 h-4 w-4 text-emerald-700 focus:ring-emerald-500" />
+                            <div class="flex-1 min-w-0">
+                                <p class="font-black text-slate-900">Cards</p>
+                                <p class="text-sm text-slate-600 mt-1">Visa, Mastercard, RuPay, and debit/credit cards</p>
+                            </div>
+                        </label>
+
+                        <label class="method-card flex items-start gap-4 p-4 cursor-pointer">
+                            <input type="radio" name="payment_method" value="netbanking" required class="mt-1 h-4 w-4 text-emerald-700 focus:ring-emerald-500" />
+                            <div class="flex-1 min-w-0">
+                                <p class="font-black text-slate-900">Net Banking</p>
+                                <p class="text-sm text-slate-600 mt-1">Choose your bank from Cashfree supported net banking list</p>
+                            </div>
+                        </label>
+
+                        <label class="method-card flex items-start gap-4 p-4 cursor-pointer">
+                            <input type="radio" name="payment_method" value="wallet" required class="mt-1 h-4 w-4 text-emerald-700 focus:ring-emerald-500" />
+                            <div class="flex-1 min-w-0">
+                                <p class="font-black text-slate-900">Wallets</p>
+                                <p class="text-sm text-slate-600 mt-1">Pay through supported wallets available in Cashfree checkout</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1">
+                <div class="summary-card sticky top-24 p-6 sm:p-7">
+                    <div class="flex items-center justify-between gap-3 mb-5">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Step 3</p>
+                            <h2 class="text-2xl font-black text-slate-900 mt-1">Order summary</h2>
+                        </div>
+                        <i class="fas fa-receipt text-emerald-700 text-xl"></i>
+                    </div>
+
+                    <div id="order-items" class="space-y-3 mb-6 pb-6 border-b border-slate-200">
+                        <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center">
+                            <p class="text-sm font-semibold text-slate-700">Loading your cart...</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between gap-4 text-sm">
+                            <span class="text-slate-600">Subtotal</span>
+                            <span id="summary-subtotal" class="font-bold text-slate-900">₹0.00</span>
+                        </div>
+                        <div class="flex justify-between gap-4 text-sm">
+                            <span class="text-slate-600">Tax (5%)</span>
+                            <span id="summary-tax" class="font-bold text-slate-900">₹0.00</span>
+                        </div>
+                        <div class="flex justify-between gap-4 text-sm">
+                            <span class="text-slate-600">Shipping</span>
+                            <span class="font-bold text-emerald-600">Free</span>
+                        </div>
+                        <div class="flex justify-between gap-4 border-t pt-4 text-lg">
+                            <span class="font-black text-slate-900">Total</span>
+                            <span id="summary-total" class="font-black text-emerald-700 text-2xl">₹0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 mb-6">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
+                                <i class="fas fa-shield-halved"></i>
+                            </div>
+                            <div>
+                                <p class="font-black text-slate-900">Cashfree secure payment</p>
+                                <p class="text-sm text-slate-600 mt-1">Your payment is handled by Cashfree-hosted checkout for better security and reliability.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="checkout-main-btn" type="button" onclick="processPayment()" class="checkout-main-btn press-feedback w-full btn justify-center py-3.5">
+                        <i class="fas fa-lock mr-2"></i>Proceed to Pay
+                    </button>
+
+                    <div class="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500">
+                        <span class="badge-pill badge-pill-soft"><i class="fas fa-bolt"></i>Fast redirect</span>
+                        <span class="badge-pill badge-pill-soft"><i class="fas fa-mobile-screen"></i>Mobile ready</span>
+                        <span class="badge-pill badge-pill-soft"><i class="fas fa-check-circle"></i>Clear totals</span>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="mobile-checkout-bar lg:hidden no-print">
+        <div class="mx-auto max-w-7xl flex items-center gap-3">
+            <div class="min-w-0">
+                <p class="mobile-total-label">Payable</p>
+                <p id="mobile-summary-total" class="mobile-total-value">₹0.00</p>
+            </div>
+            <button id="checkout-mobile-btn" type="button" onclick="processPayment()" class="checkout-main-btn press-feedback btn py-2.5 px-4 ml-auto whitespace-nowrap">
+                <i class="fas fa-lock mr-2"></i>Proceed to Pay
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+<script>
+    let isCheckoutInProgress = false;
+    let cartHasItems = false;
+    const paymentMethodButtonLabels = {
+        cards: '<i class="fas fa-lock mr-2"></i>Pay with Cards',
+        card: '<i class="fas fa-lock mr-2"></i>Pay with Cards',
+        upi: '<i class="fas fa-mobile-screen mr-2"></i>Pay with UPI',
+        wallet: '<i class="fas fa-wallet mr-2"></i>Pay with Wallets',
+        netbanking: '<i class="fas fa-landmark mr-2"></i>Pay with Net Banking',
+        default: '<i class="fas fa-lock mr-2"></i>Proceed to Pay',
+    };
+    const validationRules = {
+        email: {
+            pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            message: 'Enter a valid email address.',
+        },
+        phone: {
+            pattern: /^\d{10}$/,
+            message: 'Enter a 10-digit phone number.',
+            normalize: (value) => value.replace(/\D/g, '').slice(-10),
+        },
+        zip: {
+            pattern: /^\d{6}$/,
+            message: 'Enter a valid 6-digit ZIP code.',
+            normalize: (value) => value.replace(/\D/g, '').slice(0, 6),
+        },
+    };
+
+    function getCheckoutPrefill() {
+        const firstName = String(document.getElementById('first_name')?.value || '').trim();
+        const lastName = String(document.getElementById('last_name')?.value || '').trim();
+        const fullName = `${firstName} ${lastName}`.trim();
+        const rawContact = String(document.getElementById('phone')?.value || '').trim();
+        const normalizedContact = rawContact.replace(/\D/g, '').slice(-10);
+        return {
+            name: fullName || undefined,
+            email: String(document.getElementById('email')?.value || '').trim() || undefined,
+            contact: normalizedContact || undefined,
+        };
+    }
+
+    function getSelectedPaymentMethod() {
+        const selected = document.querySelector('input[name="payment_method"]:checked');
+        return selected ? selected.value : null;
+    }
+
+    function setFieldHint(fieldId, message = '', isError = false) {
+        const field = document.getElementById(fieldId);
+        const hint = document.getElementById(`hint-${fieldId}`);
+        if (!field || !hint) return;
+
+        hint.textContent = message;
+        hint.classList.toggle('error', Boolean(isError));
+        field.classList.toggle('is-invalid', Boolean(isError));
+    }
+
+    function validateField(fieldId) {
+        const field = document.getElementById(fieldId);
+        if (!field) return true;
+
+        const rawValue = String(field.value || '').trim();
+        if (!rawValue) {
+            setFieldHint(fieldId, 'This field is required.', true);
+            return false;
+        }
+
+        const rule = validationRules[fieldId];
+        if (!rule) {
+            setFieldHint(fieldId, '', false);
+            return true;
+        }
+
+        const normalized = rule.normalize ? rule.normalize(rawValue) : rawValue;
+        if (rule.normalize) {
+            field.value = normalized;
+        }
+
+        if (!rule.pattern.test(normalized)) {
+            setFieldHint(fieldId, rule.message, true);
+            return false;
+        }
+
+        setFieldHint(fieldId, '', false);
+        return true;
+    }
+
+    function validateCheckoutForm() {
+        const requiredFields = ['first_name', 'last_name', 'email', 'phone', 'address', 'city', 'state', 'zip'];
+        let valid = true;
+
+        requiredFields.forEach((fieldId) => {
+            const field = document.getElementById(fieldId);
+            if (!field) return;
+
+            if (fieldId in validationRules) {
+                if (!validateField(fieldId)) {
+                    valid = false;
+                }
+            } else if (!String(field.value || '').trim()) {
+                field.classList.add('is-invalid');
+                valid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+
+        return valid;
+    }
+
+    function getPayButtons() {
+        return [
+            document.getElementById('checkout-main-btn'),
+            document.getElementById('checkout-mobile-btn'),
+        ].filter(Boolean);
+    }
+
+    function syncMethodCards() {
+        document.querySelectorAll('.method-card').forEach((card) => {
+            const input = card.querySelector('input[name="payment_method"]');
+            if (!input) return;
+            card.classList.toggle('is-active', input.checked);
+        });
+    }
+
+    function updateCheckoutButtonLabel() {
+        const buttons = getPayButtons();
+        if (buttons.length === 0 || isCheckoutInProgress) return;
+
+        const method = getSelectedPaymentMethod();
+        const label = paymentMethodButtonLabels[method] || paymentMethodButtonLabels.default;
+        buttons.forEach((button) => {
+            button.innerHTML = label;
+        });
+        syncMethodCards();
+    }
+
+    function setCheckoutButtonState(disabled) {
+        const buttons = getPayButtons();
+        if (buttons.length === 0) return;
+
+        buttons.forEach((button) => {
+            button.disabled = false;
+        });
+
+        if (disabled && !isCheckoutInProgress) {
+            buttons.forEach((button) => {
+                button.innerHTML = '<i class="fas fa-cart-plus mr-2"></i>Add Items to Purchase';
+            });
+        } else if (!isCheckoutInProgress) {
+            updateCheckoutButtonLabel();
+        }
+    }
+
+    function loadCartSummary() {
+        fetch('/api/cart')
+            .then((response) => response.json())
+            .then((cart) => {
+                const orderItemsDiv = document.getElementById('order-items');
+
+                if (!cart.items || cart.items.length === 0) {
+                    cartHasItems = false;
+                    orderItemsDiv.innerHTML = `
+                        <div class="ui-empty-state p-4">
+                            <div class="ui-empty-icon w-11 h-11 mb-2">
+                                <i class="fas fa-cart-shopping text-slate-500"></i>
+                            </div>
+                            <p class="text-sm font-semibold text-slate-700">No items in your order yet</p>
+                            <p class="text-xs text-slate-500 mt-1">Scan products to continue checkout.</p>
+                        </div>
+                    `;
+                    document.getElementById('summary-subtotal').textContent = '₹0.00';
+                    document.getElementById('summary-tax').textContent = '₹0.00';
+                    document.getElementById('summary-total').textContent = '₹0.00';
+                    const mobileTotal = document.getElementById('mobile-summary-total');
+                    if (mobileTotal) mobileTotal.textContent = '₹0.00';
+                    setCheckoutButtonState(true);
+                    return;
+                }
+
+                cartHasItems = true;
+                let subtotal = 0;
+                const itemsMarkup = cart.items.map((item, index) => {
+                    const itemTotal = Number(item.price) * Number(item.qty);
+                    subtotal += itemTotal;
+                    return `
+                        <div class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0 pr-2">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Item ${index + 1}</p>
+                                    <p class="font-semibold text-sm text-slate-900 leading-5 break-words">${item.name}</p>
+                                    <p class="text-xs text-slate-600 mt-1">Qty ${item.qty} x ₹${Number(item.price).toFixed(2)}</p>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <p class="text-[11px] font-semibold text-slate-500 uppercase">Line Total</p>
+                                    <span class="font-bold text-slate-900">₹${itemTotal.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                orderItemsDiv.innerHTML = `
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                        <p class="text-xs font-bold uppercase tracking-wide text-slate-600 px-2 py-1">
+                            ${cart.items.length} item${cart.items.length > 1 ? 's' : ''} in this order
+                        </p>
+                        <div class="space-y-2 mt-1">${itemsMarkup}</div>
+                    </div>
+                `;
+
+                const tax = subtotal * 0.05;
+                const total = subtotal + tax;
+
+                document.getElementById('summary-subtotal').textContent = `₹${subtotal.toFixed(2)}`;
+                document.getElementById('summary-tax').textContent = `₹${tax.toFixed(2)}`;
+                document.getElementById('summary-total').textContent = `₹${total.toFixed(2)}`;
+                const mobileTotal = document.getElementById('mobile-summary-total');
+                if (mobileTotal) mobileTotal.textContent = `₹${total.toFixed(2)}`;
+                setCheckoutButtonState(false);
+            })
+            .catch((error) => {
+                console.error('Error loading cart:', error);
+                showToast('Error loading cart', 'error', {
+                    actionLabel: 'Retry',
+                    onAction: () => loadCartSummary(),
+                });
+            });
+    }
+
+    function processPayment() {
+        const form = document.getElementById('checkout-form');
+        const paymentMethod = getSelectedPaymentMethod();
+        const isFormValid = validateCheckoutForm();
+        if (!isFormValid) {
+            showToast('Please fix highlighted fields before checkout.', 'error');
+            const firstInvalid = document.querySelector('.checkout-input.is-invalid');
+            if (firstInvalid) firstInvalid.focus();
+            return;
+        }
+
+        if (!form.checkValidity()) {
+            showToast('Please fill in all required fields', 'error');
+            return;
+        }
+
+        if (!paymentMethod) {
+            showToast('Please select a payment mode to continue.', 'error');
+            const firstMethodInput = document.querySelector('input[name="payment_method"]');
+            if (firstMethodInput) {
+                firstMethodInput.focus();
+            }
+            return;
+        }
+
+        if (!cartHasItems) {
+            showToast('Your cart is empty. Please add items before checkout.', 'error');
+            setCheckoutButtonState(true);
+            return;
+        }
+
+        const buttons = getPayButtons();
+
+        isCheckoutInProgress = true;
+        buttons.forEach((button) => {
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Redirecting...';
+        });
+
+        const formData = new FormData();
+        formData.append('payment_method', paymentMethod);
+        formData.append('upi_id', '');
+
+        fetch('/api/pay', {
+            method: 'POST',
+            body: formData,
+            cache: 'no-store',
+        })
+        .then(async (response) => {
+            let data = {};
+            try {
+                data = await response.json();
+            } catch (parseError) {
+                data = {};
+            }
+
+            if (!response.ok) {
+                const serverError = data.error || data.message || `HTTP ${response.status}`;
+                throw new Error(serverError);
+            }
+
+            return data;
+        })
+        .then((data) => {
+            if (data.error) {
+                const details = data.message ? ` (${data.message})` : '';
+                showToast('Error: ' + data.error + details, 'error');
+                isCheckoutInProgress = false;
+                buttons.forEach((button) => {
+                    button.disabled = false;
+                });
+                updateCheckoutButtonLabel();
+                return;
+            }
+
+            if (data.payment_provider === 'cashfree' && data.cashfree) {
+                redirectToCashfreeCheckout(data, buttons);
+                return;
+            }
+
+            if (data.minimum_charge_applied) {
+                showToast(`Gateway minimum adjustment of ₹${Number(data.minimum_adjustment || 0).toFixed(2)} applied.`, 'info');
+            }
+
+            if (data.payment_completed) {
+                showToast('Your order has been placed successfully.', 'success');
+            } else if (data.reused_session) {
+                showToast('Reusing recent checkout session for faster redirect.', 'info');
+            }
+
+            if (data.checkout_url) {
+                window.location.href = data.checkout_url;
+            } else {
+                showToast('No checkout URL received from server', 'error');
+                isCheckoutInProgress = false;
+                buttons.forEach((button) => {
+                    button.disabled = false;
+                });
+                updateCheckoutButtonLabel();
+            }
+        })
+        .catch((error) => {
+            console.error('Error creating Cashfree checkout:', error);
+            showToast(error.message || 'Error creating payment checkout', 'error', {
+                actionLabel: 'Retry',
+                onAction: () => processPayment(),
+            });
+            isCheckoutInProgress = false;
+            buttons.forEach((button) => {
+                button.disabled = false;
+            });
+            updateCheckoutButtonLabel();
+        });
+    }
+
+    function redirectToCashfreeCheckout(data, buttons) {
+        if (!data.cashfree) {
+            showToast('Failed to retrieve Cashfree checkout data', 'error');
+            isCheckoutInProgress = false;
+            (buttons || []).forEach((button) => {
+                button.disabled = false;
+            });
+            updateCheckoutButtonLabel();
+            return;
+        }
+
+        if (data.cashfree.payment_link) {
+            window.location.href = data.cashfree.payment_link;
+            return;
+        }
+
+        if (!data.cashfree.payment_session_id || typeof window.Cashfree !== 'function') {
+            showToast('Cashfree SDK is unavailable for checkout', 'error');
+            isCheckoutInProgress = false;
+            (buttons || []).forEach((button) => {
+                button.disabled = false;
+            });
+            updateCheckoutButtonLabel();
+            return;
+        }
+
+        const cashfree = window.Cashfree({ mode: data.cashfree.mode || 'sandbox' });
+        cashfree.checkout({
+            paymentSessionId: data.cashfree.payment_session_id,
+            redirectTarget: '_self',
+        });
+    }
+
+    function showToast(message, type = 'info', options = {}) {
+        let container = document.getElementById('checkout-toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'checkout-toast-container';
+            container.className = 'checkout-toast-container';
+            document.body.appendChild(container);
+        }
+
+        const normalized = type === 'danger' ? 'error' : type;
+        const typeClass = ['error', 'warning', 'success', 'info'].includes(normalized) ? normalized : 'info';
+        const iconByType = {
+            error: 'times',
+            warning: 'exclamation',
+            info: 'info',
+            success: 'check',
+        };
+        const titleByType = {
+            error: 'Error',
+            warning: 'Warning',
+            info: 'Information',
+            success: 'Success',
+        };
+
+        const toastEl = document.createElement('div');
+        toastEl.className = `checkout-toast checkout-toast-${typeClass}`;
+        toastEl.innerHTML = `
+            <div class="checkout-toast-head">
+                <div class="checkout-toast-icon">
+                    <i class="fas fa-${iconByType[typeClass]}"></i>
+                </div>
+                <div class="checkout-toast-body">
+                    <p class="checkout-toast-title">${titleByType[typeClass]}</p>
+                    <p class="checkout-toast-message"></p>
+                </div>
+                <button type="button" class="checkout-toast-close" aria-label="Dismiss notification">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <button type="button" class="checkout-toast-action">OK</button>
+            <div class="checkout-toast-progress"></div>
+        `;
+
+        const messageEl = toastEl.querySelector('.checkout-toast-message');
+        messageEl.textContent = message;
+        const actionButton = toastEl.querySelector('.checkout-toast-action');
+        actionButton.textContent = String(options.actionLabel || 'OK');
+
+        const dismiss = () => {
+            if (toastEl.parentNode) {
+                toastEl.parentNode.removeChild(toastEl);
+            }
+        };
+
+        actionButton.addEventListener('click', () => {
+            if (typeof options.onAction === 'function') {
+                options.onAction();
+            }
+            dismiss();
+        });
+        toastEl.querySelector('.checkout-toast-close').addEventListener('click', dismiss);
+        container.appendChild(toastEl);
+
+        while (container.children.length > 3) {
+            container.removeChild(container.firstChild);
+        }
+
+        setTimeout(dismiss, 4500);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCartSummary();
+        updateCheckoutButtonLabel();
+
+        ['email', 'phone', 'zip'].forEach((fieldId) => {
+            const field = document.getElementById(fieldId);
+            if (!field) return;
+            field.addEventListener('blur', () => validateField(fieldId));
+            field.addEventListener('input', () => {
+                if (field.classList.contains('is-invalid')) {
+                    validateField(fieldId);
+                }
+            });
+        });
+
+        document.querySelectorAll('input[name="payment_method"]').forEach((input) => {
+            input.addEventListener('change', updateCheckoutButtonLabel);
+        });
+
+        setInterval(() => {
+            if (!isCheckoutInProgress) {
+                loadCartSummary();
+            }
+        }, 8000);
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && !isCheckoutInProgress) {
+                loadCartSummary();
+            }
+        });
+    });
+</script>
+{% endblock %}

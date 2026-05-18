@@ -1,0 +1,640 @@
+{% extends 'layouts/base.html' %}
+
+{% block extra_css %}
+<style>
+    body {
+        background:
+            radial-gradient(circle at top left, rgba(15, 118, 110, 0.10), transparent 30%),
+            radial-gradient(circle at top right, rgba(245, 158, 11, 0.08), transparent 28%),
+            linear-gradient(180deg, #f3fbf8 0%, #f8fcfb 45%, #ffffff 100%);
+    }
+
+    .hero-panel {
+        position: relative;
+        overflow: hidden;
+        border-radius: min(3rem, 10vw);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: linear-gradient(135deg, rgba(11, 19, 36, 0.95), rgba(15, 118, 110, 0.93)),
+                    linear-gradient(135deg, rgba(245, 158, 11, 0.12), transparent 45%);
+        box-shadow: 0 20px 60px -10px rgba(15, 23, 42, 0.25);
+    }
+
+    .hero-panel::before,
+    .hero-panel::after {
+        content: "";
+        position: absolute;
+        border-radius: 9999px;
+        filter: blur(20px);
+        pointer-events: none;
+    }
+
+    .hero-panel::before {
+        top: -50px;
+        right: -20px;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.3), transparent 70%);
+    }
+
+    .hero-panel::after {
+        left: -40px;
+        bottom: -60px;
+        width: 250px;
+        height: 250px;
+        background: radial-gradient(circle, rgba(20, 184, 166, 0.15), transparent 70%);
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+    }
+
+    .stat-card {
+        transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.12);
+        border-color: rgba(15, 118, 110, 0.3);
+    }
+
+    .inventory-card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8));
+    }
+
+    .inventory-card::before {
+        content: "";
+        position: absolute;
+        inset: -35% auto auto -25%;
+        width: 140px;
+        height: 140px;
+        border-radius: 9999px;
+        background: radial-gradient(circle, rgba(15, 118, 110, 0.16), transparent 70%);
+        pointer-events: none;
+    }
+
+    .inventory-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border-radius: 9999px;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        background: rgba(255, 255, 255, 0.7);
+        padding: 0.2rem 0.55rem;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: #475569;
+    }
+
+    .inventory-meter {
+        height: 0.42rem;
+        border-radius: 9999px;
+        background: rgba(148, 163, 184, 0.22);
+        overflow: hidden;
+    }
+
+    .inventory-meter-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #0f766e 0%, #f59e0b 100%);
+        transition: width 300ms ease;
+    }
+
+    .search-shell {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 10px 40px rgba(15, 23, 42, 0.06);
+    }
+
+    .product-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: min(1.5rem, 8vw);
+        transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+        animation: slideIn 0.5s ease-out both;
+    }
+
+    .product-card:nth-child(2) { animation-delay: 50ms; }
+    .product-card:nth-child(3) { animation-delay: 100ms; }
+    .product-card:nth-child(4) { animation-delay: 150ms; }
+    .product-card:nth-child(5) { animation-delay: 200ms; }
+    .product-card:nth-child(6) { animation-delay: 250ms; }
+
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 25px 50px -10px rgba(15, 23, 42, 0.15);
+    }
+
+    .product-image {
+        width: 100%;
+        height: 200px;
+        background: linear-gradient(135deg, #f0f9ff, #f0fdf4);
+        object-fit: cover;
+        transition: all 300ms ease;
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.05);
+    }
+
+    .add-to-cart-btn {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 1rem;
+        background: linear-gradient(135deg, #0f766e, #f59e0b);
+        color: white;
+        border: none;
+        border-radius: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 300ms ease;
+        transform: translateY(100%);
+    }
+
+    .product-card:hover .add-to-cart-btn {
+        transform: translateY(0);
+    }
+
+    .cart-fab {
+        width: 4.4rem;
+        height: 4.4rem;
+        border-radius: 9999px;
+        border: 1px solid rgba(255, 255, 255, 0.32);
+        background:
+            radial-gradient(80px 80px at 30% 25%, rgba(255, 255, 255, 0.35), transparent 60%),
+            linear-gradient(135deg, #0f766e 0%, #14b8a6 52%, #f59e0b 100%);
+        box-shadow: 0 18px 38px rgba(15, 23, 42, 0.32), 0 0 0 6px rgba(255, 255, 255, 0.45);
+        transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .cart-fab:hover {
+        transform: translateY(-2px) scale(1.04);
+        box-shadow: 0 24px 46px rgba(15, 23, 42, 0.38), 0 0 0 8px rgba(255, 255, 255, 0.52);
+    }
+
+    .cart-fab-logo {
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 9999px;
+        object-fit: cover;
+        box-shadow: 0 10px 18px rgba(2, 6, 23, 0.24);
+    }
+
+    .cart-fab-icon {
+        font-size: 1.8rem;
+        color: #ffffff;
+        text-shadow: 0 8px 18px rgba(2, 6, 23, 0.28);
+        transform: translateY(1px);
+    }
+
+    .cart-fab-badge {
+        top: -0.35rem;
+        right: -0.25rem;
+        min-width: 1.55rem;
+        height: 1.55rem;
+        border-radius: 9999px;
+        border: 2px solid #ffffff;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: #ffffff;
+        font-size: 0.72rem;
+        font-weight: 800;
+        box-shadow: 0 8px 18px rgba(127, 29, 29, 0.35);
+    }
+
+    .cart-sheet {
+        background: linear-gradient(180deg, #ffffff 0%, #f5fbf8 100%);
+        border-left: 1px solid rgba(148, 163, 184, 0.28);
+        box-shadow: -18px 0 48px rgba(15, 23, 42, 0.24);
+    }
+
+    .cart-sheet-head {
+        background:
+            radial-gradient(260px 120px at 0% 0%, rgba(14, 165, 233, 0.12), transparent 62%),
+            linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        backdrop-filter: blur(8px);
+    }
+
+    .cart-empty-state {
+        border: 1px dashed rgba(148, 163, 184, 0.45);
+        background: rgba(255, 255, 255, 0.82);
+        border-radius: 1rem;
+    }
+
+    .cart-summary-card {
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.09);
+    }
+
+    /* Hide the global base floating cart button on home page to avoid duplicate overlap. */
+    .floating-cart-btn {
+        display: none !important;
+    }
+</style>
+{% endblock %}
+
+{% block title %}
+<title>SmartRetail | AI Smart Checkout</title>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="py-8 sm:py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="hero-panel rounded-[2rem] px-6 py-8 text-white sm:px-8 sm:py-10 lg:px-10 lg:py-12">
+            <div class="relative z-10 grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center">
+                <div>
+                    <div class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100">
+                        <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                        Smart checkout experience
+                    </div>
+                    <h1 class="mt-6 text-4xl font-black leading-tight sm:text-5xl lg:text-6xl">
+                        Welcome to <span class="bg-gradient-to-r from-cyan-300 via-white to-emerald-300 bg-clip-text text-transparent">SmartRetail</span>
+                    </h1>
+                    <p class="mt-5 max-w-2xl text-base leading-8 text-slate-200 sm:text-lg">
+                        Scan, shop, and pay in seconds with an AI-powered retail flow designed for speed, clarity, and a polished in-store feel.
+                    </p>
+                    <div class="mt-8 flex flex-wrap gap-4">
+                        <button onclick="scrollToProducts()" class="rounded-2xl bg-white px-6 py-3.5 font-bold text-slate-900 shadow-lg shadow-emerald-500/20 transition-transform hover:-translate-y-0.5 hover:shadow-xl">
+                                <i class="fas fa-shopping-bag mr-2 text-emerald-700"></i>Start Shopping
+                        </button>
+                        <a href="/scan" class="rounded-2xl border border-white/20 bg-white/10 px-6 py-3.5 font-bold text-white backdrop-blur transition hover:bg-white/15">
+                                <i class="fas fa-barcode mr-2 text-amber-300"></i>Scan Products
+                        </a>
+                    </div>
+
+                    <div class="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        <div class="glass-card rounded-2xl px-4 py-4 text-slate-900">
+                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Products</p>
+                            <p class="mt-2 text-2xl font-black text-slate-950" id="hero-product-count">0</p>
+                            <p class="mt-1 text-sm text-slate-600">Live catalog</p>
+                        </div>
+                        <div class="glass-card rounded-2xl px-4 py-4 text-slate-900">
+                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">In stock</p>
+                            <p class="mt-2 text-2xl font-black text-slate-950" id="hero-in-stock">0</p>
+                            <p class="mt-1 text-sm text-slate-600">Ready to scan</p>
+                        </div>
+                        <div class="glass-card rounded-2xl px-4 py-4 text-slate-900">
+                            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Checkout</p>
+                            <p class="mt-2 text-2xl font-black text-slate-950">Fast</p>
+                            <p class="mt-1 text-sm text-slate-600">Low friction flow</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <div class="absolute -left-4 top-10 h-20 w-20 rounded-full bg-cyan-400/25 blur-2xl"></div>
+                    <div class="absolute -right-4 bottom-10 h-28 w-28 rounded-full bg-emerald-400/20 blur-2xl"></div>
+                    <div class="glass-card rounded-[2rem] p-5 text-slate-900 shadow-2xl">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Smart store view</p>
+                                <h2 class="mt-2 text-2xl font-black text-slate-950">Everything your shopper needs</h2>
+                            </div>
+                            <div class="rounded-2xl bg-emerald-700 px-3 py-2 text-sm font-bold text-white shadow-lg shadow-emerald-500/25">Live</div>
+                        </div>
+
+                        <div class="mt-5 grid gap-3 sm:grid-cols-2">
+                            <div class="rounded-2xl bg-slate-50 p-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                                        <span class="text-lg" aria-hidden="true">&#128424;</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-950">Barcode scan</p>
+                                        <p class="text-sm text-slate-600">Fast, camera-based detection</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="rounded-2xl bg-slate-50 p-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                                        <span class="text-lg" aria-hidden="true">&#128230;</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-950">Inventory aware</p>
+                                        <p class="text-sm text-slate-600">Stock updates live</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="rounded-2xl bg-slate-50 p-4 sm:col-span-2">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                                        <span class="text-lg" aria-hidden="true">&#128179;</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-950">Checkout-ready cart</p>
+                                        <p class="text-sm text-slate-600">Review items, totals, and pay with one tap</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Stats -->
+<section class="py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div class="stat-card inventory-card glass-card rounded-2xl p-4 sm:p-5">
+                <div class="flex items-start gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-100 to-amber-100 text-emerald-700 shadow-sm">
+                        <span class="text-xl" aria-hidden="true">&#128722;</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Products</p>
+                        <p class="text-2xl font-black text-slate-950 leading-tight" id="product-count">0</p>
+                        <div class="mt-2 flex items-center justify-between gap-2">
+                            <span class="inventory-chip">
+                                <span class="h-1.5 w-1.5 rounded-full bg-sky-500"></span>
+                                Live
+                            </span>
+                            <p class="text-xs font-semibold text-slate-500" id="product-footnote">Catalog items</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card inventory-card glass-card rounded-2xl p-4 sm:p-5">
+                <div class="flex items-start gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-green-100 to-emerald-100 text-green-600 shadow-sm">
+                        <span class="text-xl" aria-hidden="true">&#9989;</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">In Stock</p>
+                        <p class="text-2xl font-black text-slate-950 leading-tight" id="in-stock">0</p>
+                        <div class="mt-2 flex items-center justify-between gap-2 text-xs font-semibold text-slate-500">
+                            <span id="in-stock-rate">0% available</span>
+                            <span id="out-of-stock">0 out</span>
+                        </div>
+                        <div class="inventory-meter mt-2">
+                            <div class="inventory-meter-fill" id="in-stock-meter"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card glass-card rounded-2xl p-4 sm:p-5">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
+                        <span class="text-xl" aria-hidden="true">&#9889;</span>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Fast Checkout</p>
+                        <p class="text-xl font-black text-slate-950">Under 1 min</p>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card glass-card rounded-2xl p-4 sm:p-5">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sky-600">
+                        <span class="text-xl" aria-hidden="true">&#128737;</span>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Secure Payment</p>
+                        <p class="text-xl font-black text-slate-950">100% Safe</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Search & Filter Section -->
+<section class="sticky top-16 z-30 py-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-3 flex md:hidden justify-end">
+            <button
+                type="button"
+                onclick="toggleStoreControls()"
+                id="store-controls-toggle"
+                aria-expanded="false"
+                class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+            >
+                <i class="fas fa-sliders"></i>
+                Filters & Sort
+            </button>
+        </div>
+
+        <div id="store-controls-panel" class="search-shell rounded-3xl border border-white/70 p-4 sm:p-5 hidden md:block">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <!-- Search -->
+                <div class="md:col-span-2">
+                    <form onsubmit="handleSearch(event)">
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                id="search-input"
+                                placeholder="Search products, brands, or categories..."
+                                class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 pl-11 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                            />
+                            <i class="fas fa-search absolute left-4 top-4 text-slate-500"></i>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Sort -->
+                <div>
+                    <select id="sort-select" onchange="handleSort(this.value)" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100">
+                        <option value="recent">Newest First</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="popular">Most Popular</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Products Grid -->
+<section class="py-12 bg-transparent" id="products-section">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <p class="text-sm font-bold uppercase tracking-[0.22em] text-emerald-700">Catalog</p>
+                <h2 class="section-title mt-2 text-3xl font-black text-slate-950 sm:text-4xl">Browse products</h2>
+                <p class="mt-2 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">Find items quickly with search, sorting, category filters, and live stock updates.</p>
+            </div>
+            <div class="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-900/10">
+                Use the cart button to review items anytime
+            </div>
+        </div>
+
+        <div id="products-grid" class="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <!-- Products populated by JavaScript -->
+        </div>
+        
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-16">
+            <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-md shadow-slate-200/70">
+                <i class="fas fa-search text-3xl text-slate-300"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-950 mb-2">No products found</h3>
+            <p class="text-slate-600">Try adjusting your filters or search query</p>
+        </div>
+
+        <!-- Category Browse Cards -->
+        <div class="mt-2">
+            <div class="mb-4 flex items-center justify-between">
+                <h3 class="section-title text-lg font-black text-slate-950 sm:text-xl">Browse by Category</h3>
+                <div class="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onclick="toggleCategoryFilters()"
+                        id="category-filters-toggle"
+                        aria-expanded="false"
+                        class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 md:hidden"
+                    >
+                        <i class="fas fa-layer-group"></i>
+                        Categories
+                    </button>
+                    <button onclick="filterCategory('all')" class="text-sm font-semibold text-emerald-700 hover:text-emerald-800">
+                        View all
+                    </button>
+                </div>
+            </div>
+
+            <div id="category-filters-panel" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 hidden md:grid">
+                <button type="button" onclick="filterCategory('all')" data-category="all" class="category-btn rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm">
+                    <div class="mb-3 flex items-center justify-between">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                            <span class="text-lg" aria-hidden="true">&#128722;</span>
+                        </div>
+                        <span class="category-count text-xs font-bold text-slate-500" data-count-for="all">0</span>
+                    </div>
+                    <p class="font-bold text-slate-950">All Products</p>
+                    <p class="mt-1 text-xs text-slate-500">Everything in one place</p>
+                </button>
+
+                <button type="button" onclick="filterCategory('snacks')" data-category="snacks" class="category-btn rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm">
+                    <div class="mb-3 flex items-center justify-between">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                            <span class="text-lg" aria-hidden="true">&#127850;</span>
+                        </div>
+                        <span class="category-count text-xs font-bold text-slate-500" data-count-for="snacks">0</span>
+                    </div>
+                    <p class="font-bold text-slate-950">Snacks</p>
+                    <p class="mt-1 text-xs text-slate-500">Chips, biscuits, munchies</p>
+                </button>
+
+                <button type="button" onclick="filterCategory('drinks')" data-category="drinks" class="category-btn rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm">
+                    <div class="mb-3 flex items-center justify-between">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100 text-cyan-600">
+                            <span class="text-lg" aria-hidden="true">&#129380;</span>
+                        </div>
+                        <span class="category-count text-xs font-bold text-slate-500" data-count-for="drinks">0</span>
+                    </div>
+                    <p class="font-bold text-slate-950">Drinks</p>
+                    <p class="mt-1 text-xs text-slate-500">Sodas and beverages</p>
+                </button>
+
+                <button type="button" onclick="filterCategory('books')" data-category="books" class="category-btn rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm">
+                    <div class="mb-3 flex items-center justify-between">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+                            <span class="text-lg" aria-hidden="true">&#128218;</span>
+                        </div>
+                        <span class="category-count text-xs font-bold text-slate-500" data-count-for="books">0</span>
+                    </div>
+                    <p class="font-bold text-slate-950">Books</p>
+                    <p class="mt-1 text-xs text-slate-500">Reading and learning</p>
+                </button>
+
+                <button type="button" onclick="filterCategory('electronics')" data-category="electronics" class="category-btn rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm">
+                    <div class="mb-3 flex items-center justify-between">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                            <span class="text-lg" aria-hidden="true">&#128241;</span>
+                        </div>
+                        <span class="category-count text-xs font-bold text-slate-500" data-count-for="electronics">0</span>
+                    </div>
+                    <p class="font-bold text-slate-950">Electronics</p>
+                    <p class="mt-1 text-xs text-slate-500">Gadgets and accessories</p>
+                </button>
+
+                <button type="button" onclick="filterCategory('household')" data-category="household" class="category-btn rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm">
+                    <div class="mb-3 flex items-center justify-between">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                            <span class="text-lg" aria-hidden="true">&#127969;</span>
+                        </div>
+                        <span class="category-count text-xs font-bold text-slate-500" data-count-for="household">0</span>
+                    </div>
+                    <p class="font-bold text-slate-950">Household</p>
+                    <p class="mt-1 text-xs text-slate-500">Daily home essentials</p>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Floating Cart Button -->
+<div class="fixed bottom-8 right-8 z-40">
+    <button onclick="toggleCart()" class="cart-fab relative flex items-center justify-center text-white">
+        <i class="fas fa-cart-shopping cart-fab-icon" aria-hidden="true"></i>
+        <span class="cart-fab-icon" aria-hidden="true">&#128722;</span>
+        <span id="cart-badge-float" class="cart-fab-badge absolute flex items-center justify-center">0</span>
+    </button>
+</div>
+
+<!-- Cart Sidebar -->
+<div id="cart-sidebar" class="cart-sheet fixed right-0 top-0 h-full w-full md:w-96 transform translate-x-full transition-transform z-50 overflow-y-auto">
+    <div class="cart-sheet-head p-6 border-b border-slate-200 flex justify-between items-center sticky top-0">
+        <h2 class="text-2xl font-bold text-slate-900">
+            <i class="fas fa-shopping-cart mr-2 text-emerald-700"></i>Your Cart
+        </h2>
+        <button onclick="toggleCart()" class="h-10 w-10 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100">
+            <i class="fas fa-times text-2xl"></i>
+        </button>
+    </div>
+    
+    <div id="cart-items-container" class="p-6 space-y-4">
+        <!-- Cart items populated by JavaScript -->
+    </div>
+    
+    <div id="cart-empty" class="cart-empty-state m-6 p-6 text-center text-slate-600">
+        <i class="fas fa-shopping-bag text-5xl text-slate-300 mb-4 block"></i>
+        <p class="font-semibold">Your cart is empty</p>
+        <p class="mt-1 text-sm text-slate-500">Add items to see totals and checkout options.</p>
+    </div>
+    
+    <!-- Cart Summary -->
+    <div id="cart-summary" class="cart-summary-card hidden border-t border-slate-200 p-6 space-y-4 sticky bottom-3 mx-3">
+        <div class="flex justify-between">
+            <span class="text-slate-600">Subtotal</span>
+            <span class="font-bold" id="subtotal">₹0</span>
+        </div>
+        <div class="flex justify-between">
+            <span class="text-slate-600">Discount</span>
+            <span class="font-bold text-green-600" id="discount">-₹0</span>
+        </div>
+        <div class="flex justify-between border-t pt-4">
+            <span class="text-lg font-bold text-slate-900">Total</span>
+            <span class="text-2xl font-black text-emerald-700" id="total">₹0</span>
+        </div>
+        <button onclick="goToCheckout()" class="w-full bg-gradient-to-r from-emerald-700 to-amber-500 text-white py-3 rounded-lg font-bold hover:shadow-lg transition">
+            <i class="fas fa-credit-card mr-2"></i>Proceed to Checkout
+        </button>
+    </div>
+</div>
+
+<!-- Cart Overlay -->
+<div id="cart-overlay" class="fixed inset-0 bg-black/50 opacity-0 invisible transition-all z-40" onclick="toggleCart()"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/store.js"></script>
+{% endblock %}

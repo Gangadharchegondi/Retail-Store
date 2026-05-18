@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+jinja2
+opencv-python
+pyzbar
+qrcode
+reportlab
+python-multipart
+requests
+python-dotenv
+itsdangerous
+pytest
+httpx

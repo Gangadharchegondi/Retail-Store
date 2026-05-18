@@ -1,0 +1,267 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+<title>Invoice - SmartRetail</title>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.invoice-page {
+    min-height: calc(100vh - 64px);
+    background:
+    radial-gradient(900px 420px at 0% -10%, rgba(15, 118, 110, 0.18), transparent 54%),
+    radial-gradient(860px 400px at 100% 0%, rgba(245, 158, 11, 0.16), transparent 56%),
+    linear-gradient(180deg, #f3fbf8 0%, #f8fbff 48%, #eefaf6 100%);
+}
+
+.invoice-shell {
+    border-radius: 26px;
+    background: #ffffff;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    box-shadow: 0 34px 90px rgba(15, 23, 42, 0.18);
+    overflow: hidden;
+}
+
+.invoice-head {
+    background: linear-gradient(120deg, #0f172a 0%, #0f766e 58%, #f59e0b 100%);
+    color: #fff;
+    position: relative;
+}
+
+.invoice-head::after {
+    content: "";
+    position: absolute;
+    right: -90px;
+    top: -90px;
+    width: 240px;
+    height: 240px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.meta-card {
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    background: #f8fbff;
+}
+
+.invoice-stat {
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: #ffffff;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.65);
+}
+
+.item-table thead th {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 800;
+    padding: 0.9rem 1rem;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.item-table tbody td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid #eef2f7;
+    color: #0f172a;
+    font-size: 0.92rem;
+}
+
+.item-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.total-card {
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    background: linear-gradient(145deg, #f8fafc, #eef2ff);
+}
+
+.print-note {
+    border-radius: 12px;
+    border: 1px dashed #93c5fd;
+    background: #eff6ff;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.chip-paid {
+    color: #065f46;
+    background: #d1fae5;
+}
+
+.chip-pending {
+    color: #92400e;
+    background: #fef3c7;
+}
+
+.chip-failed {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+@media print {
+    .invoice-page {
+        background: #fff !important;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="invoice-page px-4 py-10 sm:py-12">
+    <div class="max-w-5xl mx-auto">
+        <section class="invoice-shell">
+            <header class="invoice-head px-6 sm:px-8 py-8 sm:py-10">
+                <div class="relative z-10 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
+                    <div>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center overflow-hidden">
+                                <img src="/static/images/logo.svg" alt="SmartRetail" class="w-9 h-9 object-contain" />
+                            </div>
+                            <div>
+                                <h1 class="text-2xl sm:text-3xl font-black tracking-tight">SmartRetail</h1>
+                                <p class="text-emerald-100 text-sm font-medium">Tax Invoice & Payment Receipt</p>
+                            </div>
+                        </div>
+                        <p class="text-emerald-100">Thank you for your purchase. Your payment has been recorded successfully.</p>
+                    </div>
+
+                    <div class="text-left sm:text-right">
+                        <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-xs font-black tracking-widest uppercase">
+                            <i class="fas fa-check-circle"></i>
+                            {{ status }}
+                        </span>
+                        <div class="mt-4 text-sm text-emerald-100 space-y-1">
+                            <p><span class="font-bold text-white">Invoice:</span> {{ invoice_no }}</p>
+                            <p><span class="font-bold text-white">Order:</span> #{{ order_id }}</p>
+                            <p><span class="font-bold text-white">Date:</span> {{ invoice_date }}</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="px-6 sm:px-8 py-7 sm:py-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-7">
+                    <div class="meta-card p-4">
+                        <p class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Billed To</p>
+                        <p class="font-black text-slate-900">{{ customer_name }}</p>
+                        <p class="text-sm text-slate-600 mt-1 break-all">{{ customer_email }}</p>
+                        <p class="text-sm text-slate-600">Payment Method: <span class="font-bold text-slate-900">{{ payment_method }}</span></p>
+                    </div>
+                    <div class="meta-card p-4 md:text-right">
+                        <p class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Company</p>
+                        <p class="font-black text-slate-900">SmartRetail Technologies</p>
+                        <p class="text-sm text-slate-600 mt-1">Bengaluru, India</p>
+                        <p class="text-sm text-slate-600">support@smartretail.local</p>
+                    </div>
+                </div>
+
+                {% set status_key = (status or 'completed')|lower %}
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-7">
+                    <div class="invoice-stat p-4">
+                        <p class="text-[11px] font-bold uppercase tracking-widest text-slate-500">Line Items</p>
+                        <p class="text-2xl font-black text-slate-900 mt-1">{{ item_count }}</p>
+                    </div>
+                    <div class="invoice-stat p-4">
+                        <p class="text-[11px] font-bold uppercase tracking-widest text-slate-500">Status</p>
+                        <div class="mt-2">
+                            <span class="chip {% if status_key in ['completed', 'paid'] %}chip-paid{% elif status_key in ['pending'] %}chip-pending{% else %}chip-failed{% endif %}">{{ status }}</span>
+                        </div>
+                    </div>
+                    <div class="invoice-stat p-4">
+                        <p class="text-[11px] font-bold uppercase tracking-widest text-slate-500">Invoice Value</p>
+                        <p class="text-2xl font-black text-emerald-700 mt-1">&#8377;{{ grand_total }}</p>
+                    </div>
+                </div>
+
+                {% if ordered_items %}
+                <div class="rounded-2xl border border-slate-200 overflow-hidden mb-7">
+                    <table class="w-full item-table">
+                        <thead>
+                            <tr>
+                                <th class="text-left">Description</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-right">Unit Price</th>
+                                <th class="text-right">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in ordered_items %}
+                            <tr>
+                                <td class="font-semibold">{{ item.name }}</td>
+                                <td class="text-center">{{ item.quantity }}</td>
+                                <td class="text-right">&#8377;{{ '%.2f'|format(item.price) }}</td>
+                                <td class="text-right font-bold">&#8377;{{ '%.2f'|format(item.total) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 mb-7 text-sm text-slate-700">
+                    No order items available for this purchase.
+                </div>
+                {% endif %}
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+                    <div class="print-note p-4 text-sm text-emerald-800">
+                        Keep this invoice for warranty, returns, and accounting records.
+                    </div>
+
+                    <div class="total-card p-5 space-y-3">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-slate-600">Subtotal</span>
+                            <span class="font-bold text-slate-900">&#8377;{{ subtotal }}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-slate-600">Tax (5%)</span>
+                            <span class="font-bold text-slate-900">&#8377;{{ tax }}</span>
+                        </div>
+                        <div class="h-px bg-slate-200"></div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-base font-bold text-slate-900">Grand Total</span>
+                            <span class="text-2xl font-black text-emerald-700">&#8377;{{ grand_total }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex flex-col sm:flex-row gap-3 no-print">
+                    {% if bill_download_url %}
+                    <a href="{{ bill_download_url }}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-700 to-amber-500 px-5 py-3 text-sm font-black text-white hover:from-emerald-800 hover:to-amber-600 transition-colors">
+                        <i class="fas fa-file-invoice"></i>
+                        Download Bill
+                    </a>
+                    {% endif %}
+                    {% if bill_pdf_url %}
+                    <a href="{{ bill_pdf_url }}" class="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-5 py-3 text-sm font-black text-emerald-800 hover:bg-emerald-100 transition-colors">
+                        <i class="fas fa-file-pdf"></i>
+                        Download PDF
+                    </a>
+                    {% endif %}
+                    <a href="/site" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 px-5 py-3 text-sm font-black text-slate-900 hover:bg-slate-50 transition-colors">
+                        <i class="fas fa-store"></i>
+                        Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

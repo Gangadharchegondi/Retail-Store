@@ -1,0 +1,670 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+<title>Scan Products - SmartRetail</title>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --scan-navy: #0f172a;
+    --scan-blue: #0f766e;
+    --scan-cyan: #f59e0b;
+    --scan-ink: #1e293b;
+    --scan-muted: #64748b;
+    --scan-bg: #f3f7ff;
+}
+
+.scan-page {
+    min-height: calc(100vh - 64px);
+    background:
+    radial-gradient(900px 420px at 4% -8%, rgba(15, 118, 110, 0.22), transparent 50%),
+    radial-gradient(740px 360px at 96% 0%, rgba(245, 158, 11, 0.18), transparent 52%),
+    linear-gradient(180deg, #f3fbf8 0%, #edf9f5 45%, #f8fbff 100%);
+}
+
+.scan-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 22px;
+    border: 1px solid rgba(148, 163, 184, 0.26);
+    background:
+        linear-gradient(128deg, rgba(11, 19, 36, 0.97), rgba(15, 118, 110, 0.96)),
+        radial-gradient(circle at 88% 12%, rgba(245, 158, 11, 0.30), transparent 45%);
+    box-shadow: 0 26px 62px rgba(15, 23, 42, 0.24);
+}
+
+.scan-hero::before,
+.scan-hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 9999px;
+    pointer-events: none;
+}
+
+.scan-hero::before {
+    width: 170px;
+    height: 170px;
+    top: -46px;
+    right: 40px;
+    background: radial-gradient(circle, rgba(245, 158, 11, 0.34), transparent 70%);
+}
+
+.scan-hero::after {
+    width: 230px;
+    height: 230px;
+    left: -60px;
+    bottom: -120px;
+    background: radial-gradient(circle, rgba(20, 184, 166, 0.20), transparent 70%);
+}
+
+.scan-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    background: rgba(255, 255, 255, 0.10);
+    color: #f4f1c9;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.38rem 0.8rem;
+}
+
+.scan-panel {
+    border-radius: 18px;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 16px 38px rgba(15, 23, 42, 0.08);
+}
+
+.scan-panel-title {
+    font-size: 2rem;
+    line-height: 1.1;
+    font-weight: 900;
+    color: #e2e8f0;
+    letter-spacing: -0.02em;
+}
+
+.scan-subtitle {
+    color: #c9d6ea;
+    max-width: 56ch;
+}
+
+.camera-frame {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #0b1220;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    box-shadow: 0 12px 34px rgba(15, 23, 42, 0.22);
+}
+
+.camera-status-active::before,
+.camera-status-idle::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.camera-status-active::before {
+    border: 2px solid rgba(15, 118, 110, 0.55);
+}
+
+.camera-status-idle::before {
+    border: 2px dashed rgba(148, 163, 184, 0.46);
+}
+
+.scan-compact-btn {
+    border: 1px solid #a9b8d3;
+    color: #1e2a3f;
+    border-radius: 11px;
+    padding: 0.52rem 0.9rem;
+    font-size: 0.89rem;
+    font-weight: 700;
+    background: linear-gradient(180deg, #ffffff 0%, #f2f6ff 100%);
+    transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.scan-compact-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    border-color: #7f99c0;
+    box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+}
+
+.scan-compact-btn:disabled {
+    opacity: 0.54;
+    cursor: not-allowed;
+}
+
+.scan-compact-btn.primary {
+    background: linear-gradient(92deg, #0f766e 0%, #f59e0b 100%);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 8px 18px rgba(15, 118, 110, 0.26);
+}
+
+.checkout-bar {
+    display: block;
+    width: 100%;
+    text-align: center;
+    color: #ffffff;
+    font-weight: 800;
+    border-radius: 12px;
+    padding: 0.68rem 1rem;
+    letter-spacing: 0.01em;
+    background: linear-gradient(92deg, #0f766e 0%, #f59e0b 100%);
+    box-shadow: 0 12px 24px rgba(15, 118, 110, 0.28);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.checkout-bar:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 26px rgba(15, 118, 110, 0.34);
+}
+
+.scan-info-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    background: rgba(255, 255, 255, 0.14);
+    color: #deefff;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 9999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 0.32rem 0.62rem;
+}
+
+.scan-fade-in {
+    animation: scanFadeIn 420ms ease-out both;
+}
+
+.scan-error-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.8rem;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    background: #fff1f2;
+    color: #9f1239;
+    border-radius: 12px;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.scan-error-banner button {
+    border: 1px solid rgba(190, 24, 93, 0.4);
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 0.32rem 0.58rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #9f1239;
+}
+
+@keyframes scanFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="scan-page">
+<div class="max-w-[1260px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="scan-hero mb-7 p-6 sm:p-7 scan-fade-in">
+        <div class="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <span class="scan-badge mb-3">
+                    <span class="h-2 w-2 rounded-full bg-amber-300"></span>
+                    Smart Vision Checkout
+                </span>
+                <h1 class="scan-panel-title mb-2">
+                    <i class="fas fa-barcode text-amber-300 mr-3"></i>AI Smart Scanner
+                </h1>
+                <p class="scan-subtitle">Scan product barcodes to add items to your cart automatically with live camera detection.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <span class="scan-info-chip"><i class="fas fa-camera"></i>Live feed</span>
+                <span class="scan-info-chip"><i class="fas fa-bolt"></i>Fast detect</span>
+                <span class="scan-info-chip"><i class="fas fa-cart-shopping"></i>Auto cart</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Camera Feed -->
+        <div class="lg:col-span-2">
+            <div class="scan-panel p-4">
+                <h2 class="text-lg font-black text-slate-900 mb-3 tracking-tight">
+                    <i class="fas fa-camera text-emerald-700 mr-2"></i>Live Camera Feed
+                </h2>
+
+                <!-- Camera Container -->
+                <div id="camera-shell" class="camera-frame relative camera-status-active">
+                    <img id="camera-feed" src="/video_feed" alt="Camera Feed" class="w-full h-[380px] object-cover" />
+
+                    <!-- Loading State -->
+                    <div id="loading-state" class="absolute inset-0 bg-slate-900 bg-opacity-75 flex items-center justify-center">
+                        <div class="text-center text-white">
+                            <i class="fas fa-spinner fa-spin text-3xl mb-2"></i>
+                            <p class="text-lg">Initializing camera...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Camera Controls -->
+                <div class="mt-3 flex flex-wrap gap-1.5">
+                    <button id="start-scan" class="scan-compact-btn primary press-feedback">
+                        <i class="fas fa-play mr-1"></i>Start Scanning
+                    </button>
+                    <button id="stop-scan" class="scan-compact-btn press-feedback" disabled>
+                        <i class="fas fa-stop mr-1"></i>Stop Scanning
+                    </button>
+                    <button id="clear-cart" class="scan-compact-btn press-feedback">
+                        <i class="fas fa-trash mr-1"></i>Clear Cart
+                    </button>
+                </div>
+
+                <div id="scan-error-banner" class="scan-error-banner" role="status" aria-live="polite">
+                    <span id="scan-error-message">Temporary connection issue.</span>
+                    <button type="button" id="scan-error-retry">Retry</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Sidebar -->
+        <div class="lg:col-span-1">
+            <div class="scan-panel sticky top-4 p-4">
+                <h2 class="text-2xl font-black text-slate-900 mb-4 tracking-tight">
+                    <i class="fas fa-shopping-cart text-emerald-700 mr-2"></i>Your Cart
+                </h2>
+
+                <!-- Cart Items -->
+                <div id="cart-items" class="space-y-2 max-h-80 overflow-y-auto">
+                    <!-- Items will be loaded here -->
+                </div>
+
+                <!-- Cart Total -->
+                <div id="cart-total" class="mt-4 pt-4 border-t border-slate-200">
+                    <div class="flex justify-between items-center text-[2rem] font-black leading-none text-slate-900">
+                        <span class="tracking-tight">Total:</span>
+                        <span id="total-amount" class="text-emerald-700">&#8377;0.00</span>
+                    </div>
+                </div>
+
+                <!-- Checkout Button -->
+                <div class="mt-3">
+                    <a href="/payment" class="checkout-bar">
+                        <i class="fas fa-shopping-cart mr-1"></i>Proceed to Checkout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<div id="scan-confirm-modal" class="fixed inset-0 z-[80] hidden items-center justify-center p-4 bg-slate-950/55">
+    <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-2xl p-5">
+        <div class="flex items-start gap-3">
+            <div class="h-10 w-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                <i class="fas fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-black text-slate-900" id="scan-confirm-title">Confirm action</h3>
+                <p id="scan-confirm-text" class="mt-1 text-sm text-slate-600">Are you sure?</p>
+            </div>
+        </div>
+        <div class="mt-5 flex justify-end gap-2">
+            <button id="scan-confirm-cancel" type="button" class="rounded-lg border border-slate-300 px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100">Cancel</button>
+            <button id="scan-confirm-ok" type="button" class="rounded-lg bg-red-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-red-700">Continue</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cameraFeed = document.getElementById('camera-feed');
+    const loadingState = document.getElementById('loading-state');
+    const cameraShell = document.getElementById('camera-shell');
+    const startScanBtn = document.getElementById('start-scan');
+    const stopScanBtn = document.getElementById('stop-scan');
+    const clearCartBtn = document.getElementById('clear-cart');
+    const cartItems = document.getElementById('cart-items');
+    const totalAmount = document.getElementById('total-amount');
+    const scanErrorBanner = document.getElementById('scan-error-banner');
+    const scanErrorMessage = document.getElementById('scan-error-message');
+    const scanErrorRetry = document.getElementById('scan-error-retry');
+    const confirmModal = document.getElementById('scan-confirm-modal');
+    const confirmTitle = document.getElementById('scan-confirm-title');
+    const confirmText = document.getElementById('scan-confirm-text');
+    const confirmCancel = document.getElementById('scan-confirm-cancel');
+    const confirmOk = document.getElementById('scan-confirm-ok');
+
+    let isScanning = false;
+    let lastCartSignature = '';
+    let scanInFlight = false;
+    let cartInFlight = false;
+    let scanPollTimer = null;
+    let cartPollTimer = null;
+    let pendingConfirmAction = null;
+
+    loadCart(true);
+
+    cameraFeed.addEventListener('load', function() {
+        loadingState.style.opacity = '0';
+        setTimeout(() => {
+            loadingState.style.display = 'none';
+        }, 300);
+    });
+
+    startScanBtn.addEventListener('click', function() {
+        isScanning = true;
+        startScanBtn.disabled = true;
+        stopScanBtn.disabled = false;
+        cameraShell.classList.add('camera-status-active');
+        cameraShell.classList.remove('camera-status-idle');
+        scheduleScanPoll(0);
+        showToast('Scanning started! Point camera at barcodes.', 'success');
+    });
+
+    stopScanBtn.addEventListener('click', function() {
+        isScanning = false;
+        startScanBtn.disabled = false;
+        stopScanBtn.disabled = true;
+        cameraShell.classList.add('camera-status-idle');
+        cameraShell.classList.remove('camera-status-active');
+        if (scanPollTimer) {
+            clearTimeout(scanPollTimer);
+            scanPollTimer = null;
+        }
+        showToast('Scanning stopped.', 'info');
+    });
+
+    clearCartBtn.addEventListener('click', function() {
+        openConfirmModal(
+            'Clear cart?',
+            'This will remove all scanned items from your cart.',
+            'Clear Cart',
+            function () {
+                clearCart();
+            }
+        );
+    });
+
+    scanErrorRetry.addEventListener('click', function () {
+        hideScanError();
+        loadCart(true);
+        if (isScanning) {
+            scheduleScanPoll(0);
+        }
+    });
+
+    confirmCancel.addEventListener('click', closeConfirmModal);
+    confirmModal.addEventListener('click', function (event) {
+        if (event.target === confirmModal) {
+            closeConfirmModal();
+        }
+    });
+    confirmOk.addEventListener('click', function () {
+        const action = pendingConfirmAction;
+        closeConfirmModal();
+        if (typeof action === 'function') {
+            action();
+        }
+    });
+
+    cartItems.addEventListener('click', function(event) {
+        const btn = event.target.closest('button[data-name][data-qty]');
+        if (!btn) return;
+
+        const itemName = btn.dataset.name;
+        const newQty = Number(btn.dataset.qty);
+        updateQuantity(itemName, newQty);
+    });
+
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            loadCart(true);
+            if (isScanning) {
+                scheduleScanPoll(0);
+            }
+        }
+    });
+
+    scheduleCartPoll();
+
+    function scheduleScanPoll(delayMs) {
+        if (scanPollTimer) {
+            clearTimeout(scanPollTimer);
+        }
+        scanPollTimer = setTimeout(checkScanAlert, delayMs);
+    }
+
+    function scheduleCartPoll() {
+        if (cartPollTimer) {
+            clearTimeout(cartPollTimer);
+        }
+        cartPollTimer = setTimeout(function() {
+            if (!isScanning && !document.hidden) {
+                loadCart();
+            }
+            scheduleCartPoll();
+        }, 3000);
+    }
+
+    function getCartSignature(cart) {
+        const items = Array.isArray(cart.items) ? cart.items : [];
+        const itemDigest = items
+            .map(item => `${item.name}|${Number(item.price).toFixed(2)}|${item.qty}`)
+            .join('||');
+        const total = Number(cart.total || 0).toFixed(2);
+        return `${items.length}|${total}|${itemDigest}`;
+    }
+
+    function checkScanAlert() {
+        if (!isScanning || document.hidden || scanInFlight) {
+            if (isScanning) {
+                scheduleScanPoll(220);
+            }
+            return;
+        }
+
+        scanInFlight = true;
+        fetch('/api/scan_alert', { cache: 'no-store' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'scanned' && data.product) {
+                    if (data.cart) {
+                        updateCartDisplay(data.cart);
+                    } else {
+                        loadCart(true);
+                    }
+
+                    showToast(`Added: ${data.product.name}`, 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Scan check error:', error);
+                showScanError('Scanner update failed. Please retry.');
+            })
+            .finally(() => {
+                scanInFlight = false;
+                if (isScanning) {
+                    scheduleScanPoll(180);
+                }
+            });
+    }
+
+    function loadCart(force = false) {
+        if (cartInFlight) {
+            return;
+        }
+
+        cartInFlight = true;
+        fetch('/api/cart', { cache: 'no-store' })
+            .then(response => response.json())
+            .then(data => {
+                hideScanError();
+                updateCartDisplay(data, force);
+            })
+            .catch(error => {
+                console.error('Cart load error:', error);
+                showScanError('Unable to load cart. Check connection and retry.');
+            })
+            .finally(() => {
+                cartInFlight = false;
+            });
+    }
+
+    function updateCartDisplay(cart, force = false) {
+        const signature = getCartSignature(cart);
+        if (!force && signature === lastCartSignature) {
+            return;
+        }
+
+        lastCartSignature = signature;
+        cartItems.innerHTML = '';
+
+        if (cart.items && cart.items.length > 0) {
+            cart.items.forEach(item => {
+                const itemElement = document.createElement('div');
+                    itemElement.className = 'p-3 bg-white rounded border border-slate-200';
+                itemElement.innerHTML = `
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-semibold text-slate-900 truncate">${item.name}</h4>
+                            <p class="text-xs text-slate-500">&#8377;${Number(item.price).toFixed(2)} x ${item.qty}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-slate-900">&#8377;${(Number(item.price) * Number(item.qty)).toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2">
+                        <button type="button" data-name="${item.name}" data-qty="${item.qty - 1}" class="h-6 w-6 rounded bg-slate-100 text-slate-700 border border-slate-300">-</button>
+                        <span class="min-w-6 text-center text-sm">${item.qty}</span>
+                        <button type="button" data-name="${item.name}" data-qty="${item.qty + 1}" class="h-6 w-6 rounded bg-slate-100 text-slate-700 border border-slate-300">+</button>
+                    </div>
+                `;
+                cartItems.appendChild(itemElement);
+            });
+        } else {
+            cartItems.innerHTML = `
+                <div class="text-center py-10 text-slate-500">
+                    <i class="fas fa-shopping-cart text-4xl mb-2"></i>
+                    <p>Your cart is empty</p>
+                    <p class="text-sm">Scan products to add them here</p>
+                </div>
+            `;
+        }
+
+        totalAmount.innerHTML = `&#8377;${cart.total ? Number(cart.total).toFixed(2) : '0.00'}`;
+    }
+
+    function clearCart() {
+        fetch('/api/clear_cart', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.cart) {
+                    updateCartDisplay(data.cart, true);
+                } else {
+                    loadCart(true);
+                }
+                showToast('Cart cleared!', 'info');
+            })
+            .catch(error => {
+                console.error('Clear cart error:', error);
+                showToast('Error clearing cart', 'error');
+            });
+    }
+
+    function updateQuantity(itemName, newQty) {
+        if (newQty < 0) {
+            return;
+        }
+
+        if (newQty === 0) {
+            openConfirmModal(
+                'Remove item?',
+                `Remove ${itemName} from cart?`,
+                'Remove',
+                function () {
+                    submitQuantityUpdate(itemName, newQty);
+                }
+            );
+            return;
+        }
+
+        submitQuantityUpdate(itemName, newQty);
+    }
+
+    function submitQuantityUpdate(itemName, newQty) {
+
+        const formData = new FormData();
+        formData.append('item_name', itemName);
+        formData.append('quantity', newQty);
+
+        fetch('/api/update_quantity', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.cart) {
+                updateCartDisplay(data.cart, true);
+            } else {
+                loadCart(true);
+            }
+            showToast(`Updated ${itemName} quantity`, 'success');
+        })
+        .catch(error => {
+            console.error('Error updating quantity:', error);
+            showToast('Error updating quantity', 'error');
+        });
+    }
+
+    function showScanError(message) {
+        scanErrorMessage.textContent = message;
+        scanErrorBanner.style.display = 'flex';
+    }
+
+    function hideScanError() {
+        scanErrorBanner.style.display = 'none';
+    }
+
+    function openConfirmModal(title, message, actionLabel, actionHandler) {
+        confirmTitle.textContent = title;
+        confirmText.textContent = message;
+        confirmOk.textContent = actionLabel;
+        pendingConfirmAction = actionHandler;
+        confirmModal.classList.remove('hidden');
+        confirmModal.classList.add('flex');
+    }
+
+    function closeConfirmModal() {
+        confirmModal.classList.add('hidden');
+        confirmModal.classList.remove('flex');
+        pendingConfirmAction = null;
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bill {{ invoice_no }}</title>
+    <style>
+        :root {
+            --ink-900: #0f172a;
+            --ink-700: #334155;
+            --ink-500: #64748b;
+            --line: #dbe5f0;
+            --surface: #ffffff;
+            --surface-soft: #f8fbff;
+            --bg: #edf2ff;
+            --brand-a: #1d4ed8;
+            --brand-b: #0e7490;
+            --brand-c: #06b6d4;
+            --success-bg: #dcfce7;
+            --success-fg: #166534;
+            --pending-bg: #fef3c7;
+            --pending-fg: #92400e;
+            --failed-bg: #fee2e2;
+            --failed-fg: #991b1b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", "Trebuchet MS", "Inter", sans-serif;
+            color: var(--ink-900);
+            background:
+                radial-gradient(1100px 520px at -10% -20%, rgba(29, 78, 216, 0.2), transparent 58%),
+                radial-gradient(920px 420px at 100% 0, rgba(14, 116, 144, 0.18), transparent 56%),
+                var(--bg);
+            padding: 34px 14px;
+        }
+
+        .invoice {
+            max-width: 980px;
+            margin: 0 auto;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            box-shadow: 0 30px 88px rgba(15, 23, 42, 0.16);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .watermark {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            font-size: 78px;
+            font-weight: 900;
+            letter-spacing: 0.22em;
+            color: rgba(2, 132, 199, 0.06);
+            text-transform: uppercase;
+            transform: rotate(-22deg) translateY(-12px);
+            user-select: none;
+            z-index: 0;
+        }
+
+        .invoice::before {
+            content: "";
+            position: absolute;
+            right: -120px;
+            top: -120px;
+            width: 320px;
+            height: 320px;
+            border-radius: 999px;
+            background: rgba(125, 211, 252, 0.22);
+            filter: blur(12px);
+            pointer-events: none;
+        }
+
+        .head {
+            background: linear-gradient(118deg, var(--brand-a) 0%, var(--brand-b) 56%, var(--brand-c) 100%);
+            color: #fff;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            gap: 22px;
+            flex-wrap: wrap;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .head::after {
+            content: "";
+            position: absolute;
+            left: -45px;
+            bottom: -55px;
+            width: 180px;
+            height: 180px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .brand-wrap {
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-title {
+            margin: 0;
+            font-size: 32px;
+            line-height: 1.04;
+            font-weight: 900;
+            letter-spacing: 0.02em;
+        }
+
+        .brand-sub {
+            margin: 9px 0 0;
+            opacity: 0.95;
+            font-size: 13px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .meta {
+            position: relative;
+            z-index: 1;
+            text-align: right;
+            font-size: 13px;
+            line-height: 1.76;
+            min-width: 245px;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(4px);
+        }
+
+        .chip.ok { background: var(--success-bg); color: var(--success-fg); }
+        .chip.pending { background: var(--pending-bg); color: var(--pending-fg); }
+        .chip.failed,
+        .chip.cancelled,
+        .chip.expired {
+            background: var(--failed-bg);
+            color: var(--failed-fg);
+        }
+
+        .head-grid {
+            margin-top: 16px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+            width: 100%;
+        }
+
+        .head-pill {
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            background: rgba(255, 255, 255, 0.14);
+            padding: 9px 11px;
+            min-height: 56px;
+        }
+
+        .head-pill .k {
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 4px;
+        }
+
+        .head-pill .v {
+            font-size: 13px;
+            font-weight: 800;
+            color: #ffffff;
+            word-break: break-word;
+        }
+
+        .body {
+            padding: 24px 28px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .card {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px;
+            background: var(--surface-soft);
+        }
+
+        .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--ink-500);
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .value-main {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--ink-900);
+        }
+
+        .value-sub {
+            margin-top: 4px;
+            font-size: 13px;
+            color: var(--ink-700);
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        .meta-stack {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            align-items: start;
+        }
+
+        .seller-list {
+            margin: 4px 0 0;
+            padding: 0;
+            list-style: none;
+            display: grid;
+            gap: 4px;
+            font-size: 12px;
+            color: var(--ink-700);
+            font-weight: 600;
+        }
+
+        .qr-wrap {
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            background: #ffffff;
+            padding: 8px;
+            min-width: 104px;
+            text-align: center;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+        }
+
+        .qr-wrap img {
+            width: 88px;
+            height: 88px;
+            margin: 0 auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+        }
+
+        .qr-caption {
+            margin-top: 5px;
+            font-size: 10px;
+            color: #64748b;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .table-wrap {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            overflow: hidden;
+            background: #fff;
+            margin-top: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: #f4f8ff;
+            color: #516175;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-size: 11px;
+            font-weight: 800;
+            text-align: left;
+            padding: 12px 12px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        tbody td {
+            font-size: 13px;
+            padding: 12px 12px;
+            border-bottom: 1px solid #eef2f7;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fbfdff;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .item-name {
+            font-weight: 700;
+            color: var(--ink-900);
+        }
+
+        .num {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .money {
+            font-weight: 700;
+            color: #0b3a87;
+        }
+
+        .summary {
+            margin-top: 16px;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 14px;
+            align-items: start;
+        }
+
+        .note {
+            border-radius: 14px;
+            border: 1px dashed #93c5fd;
+            background: #eff6ff;
+            padding: 14px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #1e3a8a;
+        }
+
+        .totals {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: linear-gradient(145deg, #f8fafc, #eef2ff);
+            padding: 14px 14px 10px;
+        }
+
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin: 7px 0;
+            color: var(--ink-700);
+        }
+
+        .totals-row + .totals-row {
+            border-top: 1px dashed #d8e1ef;
+            padding-top: 7px;
+        }
+
+        .totals-row.grand {
+            margin-top: 10px;
+            border-top: 1px solid #c8d8ef;
+            padding-top: 10px;
+        }
+
+        .totals-row.meta {
+            color: #334155;
+            font-weight: 600;
+        }
+
+        .totals-row strong {
+            color: #0b3a87;
+            font-size: 21px;
+            letter-spacing: 0.01em;
+        }
+
+        .foot {
+            border-top: 1px dashed var(--line);
+            padding: 14px 28px 22px;
+            color: var(--ink-700);
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .foot .left,
+        .foot .right {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .actions {
+            position: sticky;
+            bottom: 10px;
+            display: flex;
+            justify-content: center;
+            margin-top: 16px;
+            gap: 10px;
+        }
+
+        .btn {
+            border: 0;
+            border-radius: 11px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+
+        .btn.print {
+            background: #1d4ed8;
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.32);
+        }
+
+        .btn.close {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 14px 8px;
+            }
+
+            .meta {
+                text-align: left;
+            }
+
+            .head {
+                padding: 22px;
+            }
+
+            .brand-title {
+                font-size: 26px;
+            }
+
+            .head-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .body {
+                padding: 18px;
+            }
+
+            .meta-grid,
+            .summary {
+                grid-template-columns: 1fr;
+            }
+
+            .meta-stack {
+                grid-template-columns: 1fr;
+            }
+
+            .qr-wrap {
+                width: fit-content;
+            }
+
+            .foot {
+                padding: 14px 18px 20px;
+            }
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+
+            .invoice {
+                box-shadow: none;
+                border: 0;
+                border-radius: 0;
+                max-width: none;
+            }
+
+            .actions {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% set status_key = (status or 'pending')|lower %}
+    <section class="invoice">
+        <div class="watermark">SmartRetail</div>
+        <header class="head">
+            <div class="brand-wrap">
+                <h1 class="brand-title">SmartRetail Invoice</h1>
+                <p class="brand-sub">Tax Invoice and Payment Receipt</p>
+            </div>
+
+            <div class="meta">
+                <span class="chip {% if status_key in ['completed', 'paid', 'success', 'succeeded'] %}ok{% elif status_key in ['pending', 'processing', 'requires_payment_method'] %}pending{% else %}failed{% endif %}">{{ status }}</span>
+                <div><strong>Invoice:</strong> {{ invoice_no }}</div>
+                <div><strong>Order:</strong> #{{ order_id }}</div>
+                <div><strong>Date:</strong> {{ invoice_date }}</div>
+            </div>
+
+            <div class="head-grid">
+                <div class="head-pill">
+                    <div class="k">Customer</div>
+                    <div class="v">{{ customer_name }}</div>
+                </div>
+                <div class="head-pill">
+                    <div class="k">Payment Method</div>
+                    <div class="v">{{ payment_method }}</div>
+                </div>
+                <div class="head-pill">
+                    <div class="k">Item Count</div>
+                    <div class="v">{{ item_count }}</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="body">
+            <div class="meta-grid">
+                <div class="card">
+                    <div class="label">Billed To</div>
+                    <div class="value-main">{{ customer_name }}</div>
+                    <div class="value-sub">{{ customer_email }}</div>
+                </div>
+                <div class="card">
+                    <div class="label">Reference</div>
+                    <div class="meta-stack">
+                        <div>
+                            <div class="value-main">{{ invoice_no }}</div>
+                            <div class="value-sub">Generated: {{ bill_generated_at }}</div>
+                            <div class="value-sub">Payment Ref: {{ payment_reference or '-' }}</div>
+                            <ul class="seller-list">
+                                <li>Seller: SmartRetail Technologies</li>
+                                <li>Email: support@smartretail.local</li>
+                                <li>Phone: +91 99999 99999</li>
+                                <li>Address: Bengaluru, Karnataka</li>
+                            </ul>
+                        </div>
+                        <div class="qr-wrap">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=INV-{{ invoice_no }}-ORD-{{ order_id }}" alt="Invoice QR" loading="lazy" />
+                            <div class="qr-caption">Invoice QR</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="num">Qty</th>
+                            <th class="num">Unit Price</th>
+                            <th class="num">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if ordered_items and ordered_items|length > 0 %}
+                            {% for item in ordered_items %}
+                            <tr>
+                                <td class="item-name">{{ item.name }}</td>
+                                <td class="num">{{ item.quantity }}</td>
+                                <td class="num">INR {{ '%.2f'|format(item.price) }}</td>
+                                <td class="num money">INR {{ '%.2f'|format(item.total) }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" style="text-align:center; color:#64748b;">No billable items found for this order.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="summary">
+                <div class="note">
+                    Keep this invoice for returns, reimbursements, and accounting records. Amounts are shown in INR and tax is included as per configured store rules.
+                </div>
+
+                <div class="totals">
+                    <div class="totals-row"><span>Subtotal</span><span>INR {{ subtotal }}</span></div>
+                    <div class="totals-row"><span>GST (5%)</span><span>INR {{ tax }}</span></div>
+                    <div class="totals-row meta"><span>Payment Reference</span><span>{{ payment_reference or '-' }}</span></div>
+                    <div class="totals-row grand"><span><strong>Grand Total</strong></span><span><strong>INR {{ grand_total }}</strong></span></div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="foot">
+            <div class="left">
+                <span><strong>Generated at:</strong> {{ bill_generated_at }}</span>
+                <span><strong>Order ID:</strong> #{{ order_id }}</span>
+            </div>
+            <div class="right">
+                <span>SmartRetail Technologies</span>
+                <span>Thank you for shopping with SmartRetail.</span>
+            </div>
+        </footer>
+    </section>
+
+    <div class="actions">
+        <button class="btn print" onclick="window.print()">Print Bill</button>
+        {% if bill_pdf_url %}
+        <button class="btn close" onclick="window.location.href='{{ bill_pdf_url }}'">Download PDF</button>
+        {% endif %}
+        <button class="btn close" onclick="window.location.href='/payment-success?order_id={{ order_id }}'">Back</button>
+    </div>
+
+    {% if auto_print %}
+    <script>
+        window.addEventListener('load', function () {
+            // Delay slightly so layout/fonts are ready before opening print dialog.
+            setTimeout(function () {
+                window.print();
+            }, 300);
+        });
+    </script>
+    {% endif %}
+</body>
+</html>

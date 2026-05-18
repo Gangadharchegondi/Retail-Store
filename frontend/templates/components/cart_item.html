@@ -1,0 +1,34 @@
+<!-- Cart Item Component -->
+<div class="flex items-center justify-between p-4 bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition">
+    <!-- Item Info -->
+    <div class="flex items-center gap-4 flex-1">
+        <img src="{{ item.image or '/static/images/placeholder.png' }}" class="w-16 h-16 rounded-lg object-cover bg-slate-100" />
+        <div class="flex-1">
+            <h4 class="font-semibold text-slate-900">{{ item.name }}</h4>
+            <p class="text-sm text-slate-600">₹{{ item.price }}</p>
+            <p class="text-xs text-slate-500 mt-1"><i class="fas fa-balance-scale mr-1"></i>{{ item.weight }}g</p>
+        </div>
+    </div>
+    
+    <!-- Quantity Control -->
+    <div class="flex items-center gap-2 px-3 py-2 bg-slate-100 rounded-lg">
+        <button onclick="updateQuantity('{{ item.id }}', -1)" class="text-slate-600 hover:text-slate-900 transition">
+            <i class="fas fa-minus text-sm"></i>
+        </button>
+        <span class="w-8 text-center font-bold text-slate-900">{{ item.quantity }}</span>
+        <button onclick="updateQuantity('{{ item.id }}', 1)" class="text-slate-600 hover:text-slate-900 transition">
+            <i class="fas fa-plus text-sm"></i>
+        </button>
+    </div>
+    
+    <!-- Total & Remove -->
+    <div class="flex items-center gap-4 ml-4">
+        <div class="text-right">
+            <p class="text-sm text-slate-600">Subtotal</p>
+            <p class="text-lg font-bold text-slate-900">₹{{ item.total }}</p>
+        </div>
+        <button onclick="removeFromCart('{{ item.id }}')" class="text-red-500 hover:text-red-700 transition">
+            <i class="fas fa-trash-alt text-lg"></i>
+        </button>
+    </div>
+</div>

@@ -1,0 +1,321 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+<title>My Profile - SmartRetail</title>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.profile-page {
+    min-height: calc(100vh - 64px);
+    background:
+    radial-gradient(840px 380px at 8% -8%, rgba(15, 118, 110, 0.18), transparent 52%),
+    radial-gradient(920px 440px at 100% 0%, rgba(245, 158, 11, 0.14), transparent 54%),
+    linear-gradient(180deg, #f3fbf8 0%, #edf9f5 45%, #f8fbff 100%);
+}
+
+.profile-hero {
+    border-radius: 24px;
+    border: 1px solid rgba(148, 163, 184, 0.26);
+    background: linear-gradient(128deg, rgba(11, 19, 36, 0.97), rgba(15, 118, 110, 0.95));
+    box-shadow: 0 28px 68px rgba(15, 23, 42, 0.24);
+}
+
+.profile-panel {
+    border-radius: 18px;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+}
+
+.profile-stat {
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    background: #f8fbff;
+}
+
+.detail-pill {
+    border-radius: 999px;
+    padding: 0.18rem 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.tier-platinum {
+    color: #0f172a;
+    background: #e2e8f0;
+}
+
+.tier-gold {
+    color: #92400e;
+    background: #fef3c7;
+}
+
+.tier-silver {
+    color: #334155;
+    background: #e2e8f0;
+}
+
+.tier-starter {
+    color: #115e59;
+    background: #ccfbf1;
+}
+
+.status-chip {
+    border-radius: 999px;
+    padding: 0.22rem 0.62rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.status-completed,
+.status-paid {
+    color: #065f46;
+    background: #d1fae5;
+}
+
+.status-pending {
+    color: #92400e;
+    background: #fef3c7;
+}
+
+.status-failed,
+.status-cancelled {
+    color: #991b1b;
+    background: #fee2e2;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    {% if profile_message and profile_message.type %}
+    <div class="alert alert-{{ 'success' if profile_message.type == 'success' else 'danger' }} mb-6">
+        <div class="alert-icon">{{ '✓' if profile_message.type == 'success' else '✕' }}</div>
+        <div class="alert-content">
+            <div class="alert-message">{{ profile_message.text }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="profile-hero p-7 mb-8 text-white">
+        <p class="text-xs tracking-[0.18em] uppercase font-bold text-emerald-200">Account</p>
+        <h1 class="text-3xl sm:text-4xl font-black mt-2">
+            <i class="fas fa-user-circle text-amber-300 mr-3"></i>My Profile
+        </h1>
+        <p class="text-slate-200 mt-2">View your account details and recent activity.</p>
+    </div>
+
+    {% if profile %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1 profile-panel p-6">
+            <div class="mb-6 text-center">
+                <div class="mx-auto mb-4 relative w-24 h-24">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ profile.username }}" alt="{{ profile.username }}" class="w-24 h-24 rounded-full mx-auto shadow-lg border-4 border-emerald-100">
+                    <div class="absolute bottom-0 right-0 w-6 h-6 bg-emerald-500 rounded-full border-2 border-white"></div>
+                </div>
+                <button class="text-xs text-emerald-700 hover:text-emerald-800 font-semibold mt-2" type="button">
+                    <i class="fas fa-camera mr-1"></i>Change Photo
+                </button>
+            </div>
+
+            <h2 class="text-2xl font-black text-slate-900 text-center">{{ profile.username }}</h2>
+            <p class="text-slate-600 mt-1 text-center break-all">{{ profile.email }}</p>
+
+            <div class="mt-6">
+                <h3 class="text-xs uppercase tracking-[0.16em] font-bold text-slate-500 mb-3">Customer Details</h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between items-center gap-3">
+                        <span class="text-slate-500">User ID</span>
+                        <span class="font-semibold text-slate-900">#{{ profile.id }}</span>
+                    </div>
+                    <div class="flex justify-between items-center gap-3">
+                        <span class="text-slate-500">Account Type</span>
+                        <span class="font-semibold text-slate-900">Customer</span>
+                    </div>
+                    <div class="flex justify-between items-center gap-3">
+                        <span class="text-slate-500">Member Since</span>
+                        <span class="font-semibold text-slate-900">{{ customer_details.member_since }}</span>
+                    </div>
+                    <div class="flex justify-between items-center gap-3">
+                        <span class="text-slate-500">Last Order</span>
+                        <span class="font-semibold text-slate-900">{{ customer_details.last_order }}</span>
+                    </div>
+                    <div class="flex justify-between items-center gap-3">
+                        <span class="text-slate-500">Primary Payment</span>
+                        <span class="font-semibold text-slate-900">{{ customer_details.primary_payment }}</span>
+                    </div>
+                    <div class="flex justify-between items-center gap-3">
+                        <span class="text-slate-500">Account Status</span>
+                        <span class="status-chip status-paid">{{ customer_details.account_status }}</span>
+                    </div>
+                    {% set tier_key = (customer_details.loyalty_tier or 'Starter')|lower %}
+                    <div class="flex justify-between items-center gap-3">
+                        <span class="text-slate-500">Loyalty Tier</span>
+                        <span class="detail-pill tier-{{ tier_key }}">{{ customer_details.loyalty_tier }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-7 pt-5 border-t border-slate-200">
+                <h3 class="text-xs uppercase tracking-[0.16em] font-bold text-slate-500 mb-3">Update Details</h3>
+                <form action="/profile/update" method="post" class="space-y-3">
+                    <div>
+                        <label for="profile-username" class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Name</label>
+                        <input
+                            id="profile-username"
+                            name="username"
+                            type="text"
+                            value="{{ profile.username }}"
+                            required
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                        />
+                    </div>
+                    <div>
+                        <label for="profile-email" class="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Email ID</label>
+                        <input
+                            id="profile-email"
+                            name="email"
+                            type="email"
+                            value="{{ profile.email }}"
+                            required
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        class="w-full rounded-xl bg-gradient-to-r from-emerald-700 to-amber-500 px-4 py-2.5 text-sm font-bold text-white hover:from-emerald-800 hover:to-amber-600 transition-colors"
+                    >
+                        Save Customer Details
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 space-y-6">
+            <div class="profile-panel p-6">
+                <h3 class="text-lg font-bold text-slate-900 mb-4">
+                    <i class="fas fa-chart-line text-emerald-700 mr-2"></i>Your Dashboard
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="profile-stat p-4">
+                        <p class="text-xs uppercase tracking-wide text-slate-500 font-bold">Total Orders</p>
+                        <p class="text-3xl font-black text-slate-900 mt-2" id="profile-total-orders">{{ stats.total_orders }}</p>
+                    </div>
+                    <div class="profile-stat p-4">
+                        <p class="text-xs uppercase tracking-wide text-slate-500 font-bold">Paid Orders</p>
+                        <p class="text-3xl font-black text-slate-900 mt-2" id="profile-paid-orders">{{ stats.paid_orders }}</p>
+                    </div>
+                    <div class="profile-stat p-4">
+                        <p class="text-xs uppercase tracking-wide text-slate-500 font-bold">Total Spent</p>
+                        <p class="text-3xl font-black text-slate-900 mt-2" id="profile-total-spent">INR {{ '%.2f'|format(stats.total_spent) }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-panel overflow-hidden">
+                <div class="p-5 border-b border-slate-100">
+                    <h3 class="text-lg font-black text-slate-900">
+                        <i class="fas fa-clock text-emerald-700 mr-2"></i>Recent Orders
+                    </h3>
+                </div>
+
+                {% if recent_orders and recent_orders|length > 0 %}
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-slate-50 border-b border-slate-200">
+                            <tr>
+                                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-600">Order</th>
+                                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-600">Date</th>
+                                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-600">Amount</th>
+                                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-600">Method</th>
+                                <th class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-600">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in recent_orders %}
+                            <tr class="border-b border-slate-100 hover:bg-slate-50/70">
+                                <td class="px-5 py-4 font-bold text-slate-900">#{{ order.id }}</td>
+                                <td class="px-5 py-4 text-sm text-slate-700">{{ order.created_at.strftime('%d %b %Y, %I:%M %p') if order.created_at else '-' }}</td>
+                                <td class="px-5 py-4 text-sm font-semibold text-slate-900">INR {{ '%.2f'|format(order.amount) }}</td>
+                                <td class="px-5 py-4 text-sm text-slate-700">{{ order.method }}</td>
+                                <td class="px-5 py-4">
+                                    {% set status_key = (order.status or 'pending')|lower %}
+                                    <span class="status-chip status-{{ status_key }}">{{ order.status }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="p-8 text-center">
+                    <p class="text-slate-600">No recent orders yet.</p>
+                    <a href="/site" class="inline-flex items-center gap-2 mt-4 rounded-lg bg-gradient-to-r from-emerald-700 to-amber-500 px-4 py-2 text-sm font-bold text-white hover:from-emerald-800 hover:to-amber-600">
+                        <i class="fas fa-store"></i>
+                        Start Shopping
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="profile-panel p-10 text-center">
+        <div class="w-16 h-16 mx-auto rounded-full bg-slate-100 flex items-center justify-center mb-4">
+            <i class="fas fa-user-slash text-slate-500 text-xl"></i>
+        </div>
+        <h2 class="text-xl font-black text-slate-900">Profile Not Found</h2>
+        <p class="text-slate-600 mt-2">No user details are available yet. Please register or login first.</p>
+        <a href="/register" class="inline-flex items-center gap-2 mt-5 rounded-lg bg-gradient-to-r from-emerald-700 to-amber-500 px-4 py-2 text-sm font-bold text-white hover:from-emerald-800 hover:to-amber-600">
+            <i class="fas fa-user-plus"></i>
+            Create Account
+        </a>
+    </div>
+    {% endif %}
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/utils.js"></script>
+<script src="/static/js/toast.js"></script>
+<script>
+    // Update profile dashboard stats
+    async function updateProfileStats() {
+        try {
+            const response = await fetch('/api/dashboard-stats', {
+                cache: 'no-store',
+                headers: { 'Cache-Control': 'no-cache' },
+            });
+            const data = await response.json();
+            
+            const totalOrdersEl = document.getElementById('profile-total-orders');
+            const paidOrdersEl = document.getElementById('profile-paid-orders');
+            const totalSpentEl = document.getElementById('profile-total-spent');
+            
+            if (totalOrdersEl) totalOrdersEl.textContent = data.totalOrders ?? data.total_orders ?? 0;
+            if (paidOrdersEl) paidOrdersEl.textContent = data.paidOrders ?? data.paid_orders ?? 0;
+            if (totalSpentEl) totalSpentEl.textContent = 'INR ' + (data.totalSpent ?? data.total_spent ?? 0).toFixed(2);
+        } catch (error) {
+            console.error('Failed to update profile stats:', error);
+        }
+    }
+
+    // Update stats on load and every 5 seconds
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            updateProfileStats();
+            setInterval(updateProfileStats, 5000);
+        });
+    } else {
+        updateProfileStats();
+        setInterval(updateProfileStats, 5000);
+    }
+</script>
+{% endblock %}

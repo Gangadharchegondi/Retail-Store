@@ -30,13 +30,31 @@ pip install -r backend/requirements.txt
 ```
 
 3. Create a `.env` file in the project root if you need custom settings.
-4. Start the app:
+4. Start the app locally:
 
 ```bash
 python main.py
 ```
 
 The app runs on `http://127.0.0.1:8000` by default.
+
+## Deployment
+
+This project is ready to deploy on hosts like Render or Railway.
+
+Recommended start command:
+
+```bash
+uvicorn backend.app:app --host 0.0.0.0 --port $PORT
+```
+
+Recommended build command:
+
+```bash
+pip install -r requirements.txt
+```
+
+If you deploy on Render, use the included `render.yaml` file or create a web service with those commands.
 
 ## Environment Variables
 

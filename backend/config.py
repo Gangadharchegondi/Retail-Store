@@ -44,7 +44,7 @@ WEIGHT_NOISE_RANGE = 5  # grams - simulated sensor noise
 # ========================
 # API CONFIGURATION
 # ========================
-API_HOST = os.getenv("API_HOST", "127.0.0.1")
+API_HOST = os.getenv("API_HOST", "0.0.0.0")
 API_PORT = int(os.getenv("API_PORT", "8000"))
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
